@@ -7,11 +7,13 @@ Seed database with sample data from CSV Files.
 
 from csv import DictReader
 
-from app import app, db
+from app import app, db, connect_db
 from models import User, Message, Follow
 
 
 if __name__ == "__main__":
+
+    connect_db(app)
 
     with app.app_context():
         db.drop_all()
