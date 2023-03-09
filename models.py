@@ -36,9 +36,9 @@ class Follow(db.Model):
 
 class Like(db.Model):
     """
-    Mapping user likes to warbles.
+    Mapping user likes to warbles (messages).
 
-    One user can have many likes, and one like can only have one user.
+    One user can have many liked messages, and one message can be liked by many users.
     """
 
     __tablename__ = 'likes'
@@ -107,11 +107,12 @@ class User(db.Model):
         nullable=False,
     )
 
-    messages = db.relationship('Message')
+    messages = db.relationship('Message', back_populates="user")
 
     followers = db.relationship(
         "User",
         secondary="follows",
+        back_populates="following",
         primaryjoin=(Follow.user_being_followed_id == id),
         secondaryjoin=(Follow.user_following_id == id)
     )
@@ -119,13 +120,14 @@ class User(db.Model):
     following = db.relationship(
         "User",
         secondary="follows",
+        back_populates="followers",
         primaryjoin=(Follow.user_following_id == id),
         secondaryjoin=(Follow.user_being_followed_id == id)
     )
 
     likes = db.relationship(
         'Message',
-        backref="likes"
+        secondary="likes"
     )
 
     def __repr__(self):
@@ -220,7 +222,7 @@ class Message(db.Model):
         nullable=False,
     )
 
-    user = db.relationship('User')
+    user = db.relationship('User', back_populates="messages")
 
 
 def connect_db(app):
