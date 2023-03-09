@@ -94,9 +94,6 @@ def signup():
 
         do_login(user)
 
-        import pdb
-        pdb.set_trace()
-
         return redirect("/")
 
     else:
@@ -130,7 +127,10 @@ def logout():
     Handle logout of user.
     """
 
-    # IMPLEMENT THIS
+    do_logout()
+
+    flash("Successfully logged out!", category="success")
+    return redirect("/login")
 
 
 ###################################################################################################
