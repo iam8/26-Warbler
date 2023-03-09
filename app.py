@@ -84,7 +84,7 @@ def signup():
                 username=form.username.data,
                 password=form.password.data,
                 email=form.email.data,
-                image_url=form.image_url.data or User.image_url.default.arg,
+                image_url=form.image_url.data or User.image_url.server_default.arg,
             )
             db.session.commit()
 
@@ -93,6 +93,9 @@ def signup():
             return render_template('users/signup.html', form=form)
 
         do_login(user)
+
+        import pdb
+        pdb.set_trace()
 
         return redirect("/")
 
