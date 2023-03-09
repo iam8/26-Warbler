@@ -1,20 +1,29 @@
-"""Seed database with sample data from CSV Files."""
+# Ioana A Mititean
+# Unit 26: Warbler (Twitter Clone)
+
+"""
+Seed database with sample data from CSV Files.
+"""
 
 from csv import DictReader
-from app import db
+
+from app import app, db
 from models import User, Message, Follows
 
 
-db.drop_all()
-db.create_all()
+if __name__ == "__main__":
 
-with open('generator/users.csv') as users:
-    db.session.bulk_insert_mappings(User, DictReader(users))
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
 
-with open('generator/messages.csv') as messages:
-    db.session.bulk_insert_mappings(Message, DictReader(messages))
+        with open('generator/users.csv') as users:
+            db.session.bulk_insert_mappings(User, DictReader(users))
 
-with open('generator/follows.csv') as follows:
-    db.session.bulk_insert_mappings(Follows, DictReader(follows))
+        with open('generator/messages.csv') as messages:
+            db.session.bulk_insert_mappings(Message, DictReader(messages))
 
-db.session.commit()
+        with open('generator/follows.csv') as follows:
+            db.session.bulk_insert_mappings(Follows, DictReader(follows))
+
+        db.session.commit()
