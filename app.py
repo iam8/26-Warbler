@@ -89,14 +89,14 @@ def signup():
 
         except IntegrityError:
             flash("Username already taken", 'danger')
-            return render_template('users/signup.html', form=form)
+            return render_template('users/signup.jinja2', form=form)
 
         do_login(user)
 
         return redirect("/")
 
     else:
-        return render_template('users/signup.html', form=form)
+        return render_template('users/signup.jinja2', form=form)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -117,7 +117,7 @@ def login():
 
         flash("Invalid credentials.", 'danger')
 
-    return render_template('users/login.html', form=form)
+    return render_template('users/login.jinja2', form=form)
 
 
 @app.route('/logout')
@@ -150,7 +150,7 @@ def list_users():
     else:
         users = User.query.filter(User.username.like(f"%{search}%")).all()
 
-    return render_template('users/index.html', users=users)
+    return render_template('users/index.jinja2', users=users)
 
 
 @app.route('/users/<int:user_id>')
@@ -161,8 +161,7 @@ def users_show(user_id):
 
     user = db.get_or_404(User, user_id)
 
-    # Snagging messages in order from the database;
-    # user.messages won't be in order by default
+    # Snagging messages in order from the database; user.messages won't be in order by default
     messages = (Message
                 .query
                 .filter(Message.user_id == user_id)
@@ -170,7 +169,7 @@ def users_show(user_id):
                 .limit(100)
                 .all())
 
-    return render_template('users/show.html', user=user, messages=messages)
+    return render_template('users/show.jinja2', user=user, messages=messages)
 
 
 @app.route('/users/<int:user_id>/following')
@@ -184,7 +183,7 @@ def show_following(user_id):
         return redirect("/")
 
     user = db.get_or_404(User, user_id)
-    return render_template('users/following.html', user=user)
+    return render_template('users/following.jinja2', user=user)
 
 
 @app.route('/users/<int:user_id>/followers')
@@ -198,7 +197,7 @@ def users_followers(user_id):
         return redirect("/")
 
     user = db.get_or_404(User, user_id)
-    return render_template('users/followers.html', user=user)
+    return render_template('users/followers.jinja2', user=user)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
@@ -285,7 +284,7 @@ def messages_add():
 
         return redirect(f"/users/{g.user.id}")
 
-    return render_template('messages/new.html', form=form)
+    return render_template('messages/new.jinja2', form=form)
 
 
 @app.route('/messages/<int:message_id>', methods=["GET"])
@@ -293,7 +292,7 @@ def messages_show(message_id):
     """Show a message."""
 
     msg = Message.query.get(message_id)
-    return render_template('messages/show.html', message=msg)
+    return render_template('messages/show.jinja2', message=msg)
 
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
@@ -329,10 +328,10 @@ def homepage():
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        return render_template('home.jinja2', messages=messages)
 
     else:
-        return render_template('home-anon.html')
+        return render_template('home-anon.jinja2')
 
 
 ###################################################################################################
