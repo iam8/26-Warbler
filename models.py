@@ -5,8 +5,6 @@
 SQLAlchemy models for Warbler.
 """
 
-from datetime import datetime
-
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
 
@@ -14,7 +12,7 @@ bcrypt = Bcrypt()
 db = SQLAlchemy()
 
 
-class Follows(db.Model):
+class Follow(db.Model):
     """
     Connection of a follower <-> followed_user.
     """
@@ -34,7 +32,7 @@ class Follows(db.Model):
     )
 
 
-class Likes(db.Model):
+class Like(db.Model):
     """
     Mapping user likes to warbles.
     """
@@ -110,15 +108,15 @@ class User(db.Model):
     followers = db.relationship(
         "User",
         secondary="follows",
-        primaryjoin=(Follows.user_being_followed_id == id),
-        secondaryjoin=(Follows.user_following_id == id)
+        primaryjoin=(Follow.user_being_followed_id == id),
+        secondaryjoin=(Follow.user_following_id == id)
     )
 
     following = db.relationship(
         "User",
         secondary="follows",
-        primaryjoin=(Follows.user_following_id == id),
-        secondaryjoin=(Follows.user_being_followed_id == id)
+        primaryjoin=(Follow.user_following_id == id),
+        secondaryjoin=(Follow.user_being_followed_id == id)
     )
 
     likes = db.relationship(
