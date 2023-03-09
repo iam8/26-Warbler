@@ -137,7 +137,8 @@ def logout():
 
 @app.route('/users')
 def list_users():
-    """Page with listing of users.
+    """
+    Page with listing of users.
 
     Can take a 'q' param in querystring to search by that username.
     """
@@ -154,11 +155,13 @@ def list_users():
 
 @app.route('/users/<int:user_id>')
 def users_show(user_id):
-    """Show user profile."""
+    """
+    Show user profile.
+    """
 
-    user = User.query.get_or_404(user_id)
+    user = db.get_or_404(User, user_id)
 
-    # snagging messages in order from the database;
+    # Snagging messages in order from the database;
     # user.messages won't be in order by default
     messages = (Message
                 .query
@@ -166,42 +169,49 @@ def users_show(user_id):
                 .order_by(Message.timestamp.desc())
                 .limit(100)
                 .all())
+
     return render_template('users/show.html', user=user, messages=messages)
 
 
 @app.route('/users/<int:user_id>/following')
 def show_following(user_id):
-    """Show list of people this user is following."""
+    """
+    Show list of people this user is following.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    user = User.query.get_or_404(user_id)
+    user = db.get_or_404(User, user_id)
     return render_template('users/following.html', user=user)
 
 
 @app.route('/users/<int:user_id>/followers')
 def users_followers(user_id):
-    """Show list of followers of this user."""
+    """
+    Show list of followers of this user.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    user = User.query.get_or_404(user_id)
+    user = db.get_or_404(User, user_id)
     return render_template('users/followers.html', user=user)
 
 
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
-    """Add a follow for the currently-logged-in user."""
+    """
+    Add a follow for the currently-logged-in user.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get_or_404(follow_id)
+    followed_user = db.get_or_404(User, follow_id)
     g.user.following.append(followed_user)
     db.session.commit()
 
@@ -210,7 +220,9 @@ def add_follow(follow_id):
 
 @app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
 def stop_following(follow_id):
-    """Have currently-logged-in-user stop following this user."""
+    """
+    Have currently-logged-in-user stop following this user.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -225,14 +237,18 @@ def stop_following(follow_id):
 
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
-    """Update profile for current user."""
+    """
+    Update profile for current user.
+    """
 
     # IMPLEMENT THIS
 
 
 @app.route('/users/delete', methods=["POST"])
 def delete_user():
-    """Delete user."""
+    """
+    Delete user.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
