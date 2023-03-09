@@ -15,6 +15,8 @@ db = SQLAlchemy()
 class Follow(db.Model):
     """
     Connection of a follower <-> followed_user.
+
+    One user can follow multiple users, and one user can be followed by multiple others.
     """
 
     __tablename__ = 'follows'
@@ -35,6 +37,8 @@ class Follow(db.Model):
 class Like(db.Model):
     """
     Mapping user likes to warbles.
+
+    One user can have many likes, and one like can only have one user.
     """
 
     __tablename__ = 'likes'
@@ -121,7 +125,7 @@ class User(db.Model):
 
     likes = db.relationship(
         'Message',
-        secondary="likes"
+        backref="likes"
     )
 
     def __repr__(self):
@@ -188,6 +192,8 @@ class User(db.Model):
 class Message(db.Model):
     """
     An individual message ("warble").
+
+    Each message can have only one user, and each user can have many messages.
     """
 
     __tablename__ = 'messages'
