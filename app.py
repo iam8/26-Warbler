@@ -35,7 +35,9 @@ toolbar = DebugToolbarExtension(app)
 
 @app.before_request
 def add_user_to_g():
-    """If we're logged in, add curr user to Flask global."""
+    """
+    If we're logged in, add curr user to Flask global.
+    """
 
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
@@ -45,28 +47,33 @@ def add_user_to_g():
 
 
 def do_login(user):
-    """Log in user."""
+    """
+    Log in user.
+    """
 
     session[CURR_USER_KEY] = user.id
 
 
 def do_logout():
-    """Logout user."""
+    """
+    Logout user.
+    """
 
     if CURR_USER_KEY in session:
-        del session[CURR_USER_KEY]
+        # del session[CURR_USER_KEY]
+        session.pop(CURR_USER_KEY)
 
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
-    """Handle user signup.
+    """
+    Handle user signup.
 
     Create new user and add to DB. Redirect to home page.
 
     If form not valid, present form.
 
-    If the there already is a user with that username: flash message
-    and re-present form.
+    If there already is a user with that username, flash message and re-present form.
     """
 
     form = UserAddForm()
@@ -95,13 +102,14 @@ def signup():
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    """Handle user login."""
+    """
+    Handle user login.
+    """
 
     form = LoginForm()
 
     if form.validate_on_submit():
-        user = User.authenticate(form.username.data,
-                                 form.password.data)
+        user = User.authenticate(form.username.data, form.password.data)
 
         if user:
             do_login(user)
@@ -115,7 +123,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    """Handle logout of user."""
+    """
+    Handle logout of user.
+    """
 
     # IMPLEMENT THIS
 
