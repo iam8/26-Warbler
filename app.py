@@ -1,3 +1,10 @@
+# Ioana A Mititean
+# Unit 26: Warbler (Twitter Clone)
+
+"""
+Warbler app - Flask setup and config, routes, and views.
+"""
+
 import os
 
 from flask import Flask, render_template, request, flash, redirect, session, g
@@ -6,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm
 from models import db, connect_db, User, Message
+
 
 CURR_USER_KEY = "curr_user"
 
@@ -16,18 +24,14 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = (
     os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_ECHO'] = False
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
-connect_db(app)
 
-
-##############################################################################
+###################################################################################################
 # User signup/login/logout
-
 
 @app.before_request
 def add_user_to_g():
@@ -116,7 +120,7 @@ def logout():
     # IMPLEMENT THIS
 
 
-##############################################################################
+###################################################################################################
 # General user routes:
 
 @app.route('/users')
@@ -230,7 +234,7 @@ def delete_user():
     return redirect("/signup")
 
 
-##############################################################################
+###################################################################################################
 # Messages routes:
 
 @app.route('/messages/new', methods=["GET", "POST"])
@@ -279,9 +283,8 @@ def messages_destroy(message_id):
     return redirect(f"/users/{g.user.id}")
 
 
-##############################################################################
+###################################################################################################
 # Homepage and error pages
-
 
 @app.route('/')
 def homepage():
@@ -304,7 +307,7 @@ def homepage():
         return render_template('home-anon.html')
 
 
-##############################################################################
+###################################################################################################
 # Turn off all caching in Flask
 #   (useful for dev; in production, this kind of stuff is typically
 #   handled elsewhere)
@@ -320,3 +323,16 @@ def add_header(req):
     req.headers["Expires"] = "0"
     req.headers['Cache-Control'] = 'public, max-age=0'
     return req
+
+
+###################################################################################################
+# MAIN
+
+if __name__ == "__main__":
+
+    connect_db(app)
+
+    with app.app_context():
+        db.create_all()
+
+    app.run(host='127.0.0.1', port=5000, debug=True, threaded=False)
