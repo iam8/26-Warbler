@@ -1,4 +1,9 @@
-"""SQLAlchemy models for Warbler."""
+# Ioana A Mititean
+# Unit 26: Warbler (Twitter Clone)
+
+"""
+SQLAlchemy models for Warbler.
+"""
 
 from datetime import datetime
 
@@ -10,7 +15,9 @@ db = SQLAlchemy()
 
 
 class Follows(db.Model):
-    """Connection of a follower <-> followed_user."""
+    """
+    Connection of a follower <-> followed_user.
+    """
 
     __tablename__ = 'follows'
 
@@ -28,9 +35,11 @@ class Follows(db.Model):
 
 
 class Likes(db.Model):
-    """Mapping user likes to warbles."""
+    """
+    Mapping user likes to warbles.
+    """
 
-    __tablename__ = 'likes' 
+    __tablename__ = 'likes'
 
     id = db.Column(
         db.Integer,
@@ -50,7 +59,9 @@ class Likes(db.Model):
 
 
 class User(db.Model):
-    """User in the system."""
+    """
+    User in the system.
+    """
 
     __tablename__ = 'users'
 
@@ -73,12 +84,12 @@ class User(db.Model):
 
     image_url = db.Column(
         db.Text,
-        default="/static/images/default-pic.png",
+        server_default="/static/images/default-pic.png",
     )
 
     header_image_url = db.Column(
         db.Text,
-        default="/static/images/warbler-hero.jpg"
+        server_default="/static/images/warbler-hero.jpg"
     )
 
     bio = db.Column(
@@ -119,20 +130,25 @@ class User(db.Model):
         return f"<User #{self.id}: {self.username}, {self.email}>"
 
     def is_followed_by(self, other_user):
-        """Is this user followed by `other_user`?"""
+        """
+        Is this user followed by `other_user`?
+        """
 
         found_user_list = [user for user in self.followers if user == other_user]
         return len(found_user_list) == 1
 
     def is_following(self, other_user):
-        """Is this user following `other_use`?"""
+        """
+        Is this user following `other_user`?
+        """
 
         found_user_list = [user for user in self.following if user == other_user]
         return len(found_user_list) == 1
 
     @classmethod
     def signup(cls, username, email, password, image_url):
-        """Sign up user.
+        """
+        Sign up user.
 
         Hashes password and adds user to system.
         """
@@ -151,7 +167,8 @@ class User(db.Model):
 
     @classmethod
     def authenticate(cls, username, password):
-        """Find user with `username` and `password`.
+        """
+        Find user with `username` and `password`.
 
         This is a class method (call it on the class, not an individual user.)
         It searches for a user whose password hash matches this password
@@ -171,7 +188,9 @@ class User(db.Model):
 
 
 class Message(db.Model):
-    """An individual message ("warble")."""
+    """
+    An individual message ("warble").
+    """
 
     __tablename__ = 'messages'
 
@@ -188,7 +207,7 @@ class Message(db.Model):
     timestamp = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.utcnow(),
+        server_default=db.func.now(),
     )
 
     user_id = db.Column(
@@ -201,9 +220,8 @@ class Message(db.Model):
 
 
 def connect_db(app):
-    """Connect this database to provided Flask app.
-
-    You should call this in your Flask app.
+    """
+    Connect this database to provided Flask app.
     """
 
     db.app = app
