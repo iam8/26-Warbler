@@ -8,7 +8,7 @@ Seed database with sample data from CSV Files.
 from csv import DictReader
 
 from app import app, db
-from models import User, Message, Follows
+from models import User, Message, Follow
 
 
 if __name__ == "__main__":
@@ -24,6 +24,6 @@ if __name__ == "__main__":
             db.session.bulk_insert_mappings(Message, DictReader(messages))
 
         with open('generator/follows.csv') as follows:
-            db.session.bulk_insert_mappings(Follows, DictReader(follows))
+            db.session.bulk_insert_mappings(Follow, DictReader(follows))
 
         db.session.commit()
