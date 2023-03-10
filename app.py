@@ -240,13 +240,37 @@ def profile():
     Update profile for current user.
     """
 
-    # IMPLEMENT THIS
+    # Check if user is logged in
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    # TODO: display form for editing profile
-    form = UserEditForm(obj=g.user)
+    user = g.user
+    form = UserEditForm(obj=user)
+
+    if form.validate_on_submit():
+
+        # Check if password is correct
+        if not User.authenticate(user.username, form.password.data):
+            flash("Password incorrect.", category="danger")
+            return redirect("/")
+
+        user.username = form.username.data
+        user.email = form.email.data
+        user.image_url = form.image_url.data or User.image_url.server_default.arg
+        user.header_img_url = form.header_img_url.data or User.header_image_url.server_default.arg
+        user.bio = form.bio.data or None
+
+        # Handle case where username or email is already taken
+        try:
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            form.email.errors.append("Username or email taken - try again.")
+            return render_template("/users/edit.jinja2", form=form)
+
+        flash("User updated!", category="success")
+        return redirect(f"/users/{user.id}")
 
     return render_template("/users/edit.jinja2", form=form)
 
@@ -274,7 +298,8 @@ def delete_user():
 
 @app.route('/messages/new', methods=["GET", "POST"])
 def messages_add():
-    """Add a message:
+    """
+    Add a message:
 
     Show form if GET. If valid, update message and redirect to user page.
     """
@@ -297,7 +322,9 @@ def messages_add():
 
 @app.route('/messages/<int:message_id>', methods=["GET"])
 def messages_show(message_id):
-    """Show a message."""
+    """
+    Show a message.
+    """
 
     msg = Message.query.get(message_id)
     return render_template('messages/show.jinja2', message=msg)
@@ -305,7 +332,9 @@ def messages_show(message_id):
 
 @app.route('/messages/<int:message_id>/delete', methods=["POST"])
 def messages_destroy(message_id):
-    """Delete a message."""
+    """
+    Delete a message.
+    """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
@@ -323,7 +352,8 @@ def messages_destroy(message_id):
 
 @app.route('/')
 def homepage():
-    """Show homepage:
+    """
+    Show homepage:
 
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
@@ -351,7 +381,9 @@ def homepage():
 
 @app.after_request
 def add_header(req):
-    """Add non-caching headers on every request."""
+    """
+    Add non-caching headers on every request.
+    """
 
     req.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     req.headers["Pragma"] = "no-cache"
