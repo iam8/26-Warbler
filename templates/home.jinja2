@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base.jinja2' %}
 {% block content %}
   <div class="row">
 
@@ -53,11 +53,11 @@
             </div>
             <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form">
               <button class="
-                btn 
-                btn-sm 
+                btn
+                btn-sm
                 {{'btn-primary' if msg.id in likes else 'btn-secondary'}}"
               >
-                <i class="fa fa-thumbs-up"></i> 
+                <i class="fa fa-thumbs-up"></i>
               </button>
             </form>
           </li>
