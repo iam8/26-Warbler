@@ -25,7 +25,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = (
     os.environ.get('DATABASE_URL', 'postgresql:///warbler'))
 
 app.config['SQLALCHEMY_ECHO'] = False
-# app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "it's a secret")
 toolbar = DebugToolbarExtension(app)
 
@@ -88,7 +88,7 @@ def signup():
             db.session.commit()
 
         except IntegrityError:
-            flash("Username already taken", 'danger')
+            flash("Username or email already taken", 'danger')
             return render_template('users/signup.jinja2', form=form)
 
         do_login(user)
@@ -258,7 +258,8 @@ def profile():
         user.username = form.username.data
         user.email = form.email.data
         user.image_url = form.image_url.data or User.image_url.server_default.arg
-        user.header_img_url = form.header_img_url.data or User.header_image_url.server_default.arg
+        user.header_img_url = (form.header_image_url.data or
+                               User.header_image_url.server_default.arg)
         user.bio = form.bio.data or None
 
         # Handle case where username or email is already taken
@@ -266,7 +267,7 @@ def profile():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            form.email.errors.append("Username or email taken - try again.")
+            flash("Username or email already taken", 'danger')
             return render_template("/users/edit.jinja2", form=form)
 
         flash("User updated!", category="success")
