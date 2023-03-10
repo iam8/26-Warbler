@@ -11,3 +11,7 @@ Unit 26: Warbler<br>
 - File models.py: change 'backref' in User.likes relationship back to 'secondary'
 
 - File app.py: set image_url to correct default if no URL provided in form
+
+- File edit.jinja2: fixed href link for cancel button
+- File app.py, signup view: fixed IntegrityError flash message to indicate that username OR email
+is already taken
