@@ -200,6 +200,21 @@ def users_followers(user_id):
     return render_template('users/followers.jinja2', user=user)
 
 
+@app.route("/users/<int:user_id>/likes")
+def display_likes(user_id):
+    """
+    Display list of warbles (messages) this user likes.
+    """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = db.get_or_404(User, user_id)
+    likes = user.likes
+    return render_template("users/likes.jinja2", user=user, likes=likes)
+
+
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
     """
@@ -232,6 +247,40 @@ def stop_following(follow_id):
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
+
+
+@app.route("/users/add_like/<int:msg_id>", methods=["POST"])
+def add_like(msg_id):
+    """
+    Like a message for the currently-logged-in user.
+    """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message = db.session.get(Message, msg_id)
+    g.user.likes.append(message)
+    db.session.commit()
+
+    return redirect(f"/users/{g.user.id}/likes")
+
+
+@app.route("/users/remove_like/<int:msg_id>", methods=["POST"])
+def remove_like(msg_id):
+    """
+    Remove the currently-logged-in user's like on a message.
+    """
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    message = db.session.get(Message, msg_id)
+    g.user.likes.remove(message)
+    db.session.commit()
+
+    return redirect(f"/users/{g.user.id}/likes")
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
@@ -368,8 +417,9 @@ def homepage():
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
+        likes = g.user.likes
 
-        return render_template('home.jinja2', messages=messages)
+        return render_template('home.jinja2', messages=messages, likes=likes)
 
     else:
         return render_template('home-anon.jinja2')
