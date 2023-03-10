@@ -61,24 +61,26 @@
                             <p>{{ msg.text }}</p>
                         </div>
 
-                        {% if msg in likes %}
-                            <form method="POST"
-                                action="/users/remove_like/{{ msg.id }}"
-                                id="messages-form">
-                                <button class="btn btn-sm btn-primary">
-                                    <i class="fa fa-thumbs-up"></i>
-                                </button>
-                            </form>
+                        {% if msg.user_id != g.user.id %}
+                            {% if msg in likes %}
+                                <form method="POST"
+                                    action="/users/remove_like/{{ msg.id }}"
+                                    id="messages-form">
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fa fa-thumbs-up"></i>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="POST"
+                                    action="/users/add_like/{{ msg.id }}"
+                                    id="messages-form">
+                                    <button class="btn btn-sm btn-secondary">
+                                        <i class="fa fa-thumbs-up"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
                         {% else %}
-                            <form method="POST"
-                                action="/users/add_like/{{ msg.id }}"
-                                id="messages-form">
-                                <button class="btn btn-sm btn-secondary">
-                                    <i class="fa fa-thumbs-up"></i>
-                                </button>
-                            </form>
                         {% endif %}
-
                     </a>
                 </li>
             {% endfor %}
