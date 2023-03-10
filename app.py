@@ -11,7 +11,7 @@ from flask import Flask, render_template, request, flash, redirect, session, g
 from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
-from forms import UserAddForm, LoginForm, MessageForm
+from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
 from models import db, connect_db, User, Message
 
 
@@ -241,6 +241,14 @@ def profile():
     """
 
     # IMPLEMENT THIS
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    # TODO: display form for editing profile
+    form = UserEditForm(obj=g.user)
+
+    return render_template("/users/edit.jinja2", form=form)
 
 
 @app.route('/users/delete', methods=["POST"])
