@@ -1,4 +1,9 @@
-"""Message View tests."""
+# Ioana A Mititean
+# Unit 26: Warbler (Twitter Clone)
+
+"""
+Message View tests.
+"""
 
 # run these tests like:
 #
