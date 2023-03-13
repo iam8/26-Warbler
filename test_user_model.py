@@ -37,7 +37,16 @@ class UserModelTestCase(TestCase):
             Message.query.delete()
             Follow.query.delete()
 
+            user0 = User(
+                email="test@test.com",
+                username="testuser",
+                password="HASHED_PASSWORD"
+            )
+
+            db.session.add(user0)
             db.session.commit()
+
+            self.user0_id = user0.id
 
         self.client = app.test_client()
         return super().setUp()
@@ -58,8 +67,8 @@ class UserModelTestCase(TestCase):
         """
 
         user = User(
-            email="test@test.com",
-            username="testuser",
+            email="test2@test.com",
+            username="testuser2",
             password="HASHED_PASSWORD"
         )
 
@@ -74,11 +83,20 @@ class UserModelTestCase(TestCase):
             self.assertEqual(len(user.following), 0)
 
             # User should have the correct attributes
-            self.assertEqual(user.email, "test@test.com")
-            self.assertEqual(user.username, "testuser")
+            self.assertEqual(user.email, "test2@test.com")
+            self.assertEqual(user.username, "testuser2")
             self.assertEqual(user.image_url, "/static/images/default-pic.png")
             self.assertEqual(user.header_image_url, "/static/images/warbler-hero.jpg")
             self.assertIsNone(user.bio)
             self.assertIsNone(user.location)
             self.assertEqual(user.password, "HASHED_PASSWORD")
 
+    def test_repr(self):
+        """
+        Test user __repr__ method output.
+        """
+
+        with app.app_context():
+            user0 = db.session.get(User, self.user0_id)
+
+        self.assertEqual(repr(user0), f"<User #{self.user0_id}: testuser, test@test.com>")
