@@ -2,77 +2,88 @@
 # Unit 26: Warbler (Twitter Clone)
 
 """
-Message View tests.
+Message view tests.
 """
 
 # run these tests like:
 #
 #    FLASK_ENV=production python -m unittest test_message_views.py
 
-
-import os
 from unittest import TestCase
-
-from models import db, connect_db, Message, User
-
-# BEFORE we import our app, let's set an environmental variable
-# to use a different database for tests (we need to do this
-# before we import our app, since that will have already
-# connected to the database
-
-os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
-
-
-# Now we can import app
+from sqlalchemy import select
 
 from app import app, CURR_USER_KEY
+from models import db, connect_db, User, Message
 
-# Create our tables (we do this here, so we only create the tables
-# once for all tests --- in each test, we'll delete the data
-# and create fresh new clean test data
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///warbler_test"
+app.config['SQLALCHEMY_ECHO'] = False
 
-db.create_all()
+app.config['TESTING'] = True
+app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 
 # Don't have WTForms use CSRF at all, since it's a pain to test
-
 app.config['WTF_CSRF_ENABLED'] = False
+
+connect_db(app)
+
+with app.app_context():
+    db.create_all()
 
 
 class MessageViewTestCase(TestCase):
-    """Test views for messages."""
+    """
+    Test views for messages.
+    """
+
+    print("In setup function!")
 
     def setUp(self):
-        """Create test client, add sample data."""
+        """
+        Create test client, add sample data.
+        """
 
-        User.query.delete()
-        Message.query.delete()
+        with app.app_context():
+            User.query.delete()
+            Message.query.delete()
+
+            user = User.signup(username="testuser",
+                               email="test@test.com",
+                               password="testuser",
+                               image_url=None)
+
+            db.session.commit()
+            self.user_id = user.id
 
         self.client = app.test_client()
+        return super().setUp()
 
-        self.testuser = User.signup(username="testuser",
-                                    email="test@test.com",
-                                    password="testuser",
-                                    image_url=None)
+    def tearDown(self) -> None:
+        """
+        Clean up any fouled transaction.
+        """
 
-        db.session.commit()
+        with app.app_context():
+            db.session.rollback()
+
+        return super().tearDown()
 
     def test_add_message(self):
-        """Can use add a message?"""
+        """
+        Can users successfully add a message?
+        """
 
-        # Since we need to change the session to mimic logging in,
-        # we need to use the changing-session trick:
-
+        # Since we need to change the session to mimic logging in, we need to use the
+        # changing-session trick:
         with self.client as c:
             with c.session_transaction() as sess:
-                sess[CURR_USER_KEY] = self.testuser.id
+                sess[CURR_USER_KEY] = self.user_id
 
-            # Now, that session setting is saved, so we can have
-            # the rest of ours test
-
+            # Now, that session setting is saved, so we can have the rest of our tests
             resp = c.post("/messages/new", data={"text": "Hello"})
 
             # Make sure it redirects
             self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, f"/users/{self.user_id}")
 
-            msg = Message.query.one()
+            msg = db.session.scalars(select(Message)).one()
             self.assertEqual(msg.text, "Hello")
