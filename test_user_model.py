@@ -161,10 +161,14 @@ class UserModelTestCase(TestCase):
         Test that a new user is created, given valid credentials.
         """
 
+        assert False
+
     def test_signup_failure(self):
         """
         Test that a new user is not created, given invalid credentials.
         """
+
+        assert False
 
     def test_authentication_success(self):
         """
@@ -172,7 +176,11 @@ class UserModelTestCase(TestCase):
         given.
         """
 
+        assert False
+
     def test_authentication_failure(self):
         """
         Test that no user is returned when invalid credentials are given.
         """
+
+        assert False
