@@ -6,6 +6,7 @@ User model tests for Warbler.
 """
 
 from unittest import TestCase
+from sqlalchemy.exc import IntegrityError
 
 from app import app
 from models import db, connect_db, User, Message, Follow
@@ -176,7 +177,17 @@ class UserModelTestCase(TestCase):
         Test that a new user is not created, given invalid credentials.
         """
 
-        assert False
+        with app.app_context():
+
+            # Violates uniqueness
+            User.signup("testuser", "test@test.com", "SIGNUPPW", "imageurl")
+            self.assertRaises(IntegrityError, db.session.commit)
+            db.session.rollback()
+
+            # Violates non-nullable field constraints
+            User.signup(None, None, "SIGNUPPW", "imageurl")
+            self.assertRaises(IntegrityError, db.session.commit)
+            db.session.rollback()
 
     def test_authentication_success(self):
         """
