@@ -169,11 +169,11 @@ class UserModelTestCase(TestCase):
             user = User.signup("signupuser", "signup@test.com", "SIGNUPPW", "imageurl")
             db.session.commit()
 
-            self.assertIsInstance(user, User)
-            self.assertEqual(user.email, "signup@test.com")
-            self.assertEqual(user.username, "signupuser")
-            self.assertEqual(user.image_url, "imageurl")
-            self.assertTrue(user.password.startswith("$2b"))
+        self.assertIsInstance(user, User)
+        self.assertEqual(user.email, "signup@test.com")
+        self.assertEqual(user.username, "signupuser")
+        self.assertEqual(user.image_url, "imageurl")
+        self.assertTrue(user.password.startswith("$2b"))
 
     def test_signup_failure(self):
         """
@@ -198,40 +198,39 @@ class UserModelTestCase(TestCase):
         given.
         """
 
+        hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
+
+        user1 = User(
+            email="test1@test.com",
+            username="testuser1",
+            password=hashed_pwd
+        )
+
         with app.app_context():
-
-            hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
-
-            user1 = User(
-                email="test1@test.com",
-                username="testuser1",
-                password=hashed_pwd
-            )
 
             db.session.add(user1)
             db.session.commit()
 
             found_user = User.authenticate("testuser1", "HASHED_PASSWORD1")
 
-            self.assertIsInstance(found_user, User)
-            self.assertEqual(found_user.username, "testuser1")
-            self.assertEqual(found_user.email, "test1@test.com")
+        self.assertIsInstance(found_user, User)
+        self.assertEqual(found_user.username, "testuser1")
+        self.assertEqual(found_user.email, "test1@test.com")
 
     def test_authentication_failure(self):
         """
         Test that no user is returned when invalid credentials are given.
         """
 
+        hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
+
+        user1 = User(
+            email="test1@test.com",
+            username="testuser1",
+            password=hashed_pwd
+        )
+
         with app.app_context():
-
-            hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
-
-            user1 = User(
-                email="test1@test.com",
-                username="testuser1",
-                password=hashed_pwd
-            )
-
             db.session.add(user1)
             db.session.commit()
 
