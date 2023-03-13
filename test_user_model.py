@@ -7,6 +7,7 @@ User model tests for Warbler.
 
 from unittest import TestCase
 from sqlalchemy.exc import IntegrityError
+from flask_bcrypt import Bcrypt
 
 from app import app
 from models import db, connect_db, User, Message, Follow
@@ -16,6 +17,8 @@ app.config['SQLALCHEMY_ECHO'] = False
 
 app.config['TESTING'] = True
 app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
+
+bcrypt = Bcrypt()
 
 connect_db(app)
 
@@ -195,11 +198,42 @@ class UserModelTestCase(TestCase):
         given.
         """
 
-        assert False
+        with app.app_context():
+
+            hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
+
+            user1 = User(
+                email="test1@test.com",
+                username="testuser1",
+                password=hashed_pwd
+            )
+
+            db.session.add(user1)
+            db.session.commit()
+
+            found_user = User.authenticate("testuser1", "HASHED_PASSWORD1")
+
+            self.assertIsInstance(found_user, User)
+            self.assertEqual(found_user.username, "testuser1")
+            self.assertEqual(found_user.email, "test1@test.com")
 
     def test_authentication_failure(self):
         """
         Test that no user is returned when invalid credentials are given.
         """
 
-        assert False
+        with app.app_context():
+
+            hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
+
+            user1 = User(
+                email="test1@test.com",
+                username="testuser1",
+                password=hashed_pwd
+            )
+
+            db.session.add(user1)
+            db.session.commit()
+
+            self.assertFalse(User.authenticate("nonexistent", "HASHED_PASSWORD1"))
+            self.assertFalse(User.authenticate("testuser1", "NONEXISTENT"))
