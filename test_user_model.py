@@ -70,30 +70,30 @@ class UserModelTestCase(TestCase):
         Does basic model work?
         """
 
-        user = User(
-            email="test2@test.com",
-            username="testuser2",
+        user1 = User(
+            email="test1@test.com",
+            username="testuser1",
             password="HASHED_PASSWORD"
         )
 
         with app.app_context():
-            db.session.add(user)
+            db.session.add(user1)
             db.session.commit()
 
             # User should have no messages, likes, followers, and following
-            self.assertEqual(len(user.messages), 0)
-            self.assertEqual(len(user.likes), 0)
-            self.assertEqual(len(user.followers), 0)
-            self.assertEqual(len(user.following), 0)
+            self.assertEqual(len(user1.messages), 0)
+            self.assertEqual(len(user1.likes), 0)
+            self.assertEqual(len(user1.followers), 0)
+            self.assertEqual(len(user1.following), 0)
 
         # User should have the correct attributes
-        self.assertEqual(user.email, "test2@test.com")
-        self.assertEqual(user.username, "testuser2")
-        self.assertEqual(user.image_url, "/static/images/default-pic.png")
-        self.assertEqual(user.header_image_url, "/static/images/warbler-hero.jpg")
-        self.assertIsNone(user.bio)
-        self.assertIsNone(user.location)
-        self.assertEqual(user.password, "HASHED_PASSWORD")
+        self.assertEqual(user1.email, "test1@test.com")
+        self.assertEqual(user1.username, "testuser1")
+        self.assertEqual(user1.image_url, "/static/images/default-pic.png")
+        self.assertEqual(user1.header_image_url, "/static/images/warbler-hero.jpg")
+        self.assertIsNone(user1.bio)
+        self.assertIsNone(user1.location)
+        self.assertEqual(user1.password, "HASHED_PASSWORD")
 
     def test_repr(self):
         """
@@ -169,11 +169,11 @@ class UserModelTestCase(TestCase):
             user = User.signup("signupuser", "signup@test.com", "SIGNUPPW", "imageurl")
             db.session.commit()
 
-        self.assertIsInstance(user, User)
-        self.assertEqual(user.email, "signup@test.com")
-        self.assertEqual(user.username, "signupuser")
-        self.assertEqual(user.image_url, "imageurl")
-        self.assertTrue(user.password.startswith("$2b"))
+            self.assertIsInstance(user, User)
+            self.assertEqual(user.email, "signup@test.com")
+            self.assertEqual(user.username, "signupuser")
+            self.assertEqual(user.image_url, "imageurl")
+            self.assertTrue(user.password.startswith("$2b"))
 
     def test_signup_failure(self):
         """
@@ -199,7 +199,6 @@ class UserModelTestCase(TestCase):
         """
 
         hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
-
         user1 = User(
             email="test1@test.com",
             username="testuser1",
@@ -207,7 +206,6 @@ class UserModelTestCase(TestCase):
         )
 
         with app.app_context():
-
             db.session.add(user1)
             db.session.commit()
 
@@ -223,7 +221,6 @@ class UserModelTestCase(TestCase):
         """
 
         hashed_pwd = bcrypt.generate_password_hash("HASHED_PASSWORD1").decode('UTF-8')
-
         user1 = User(
             email="test1@test.com",
             username="testuser1",
