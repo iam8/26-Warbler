@@ -6,6 +6,7 @@ Message model tests for Warbler.
 """
 
 from unittest import TestCase
+from datetime import datetime
 
 from app import app
 from models import db, connect_db, User, Message, Follow
@@ -84,18 +85,39 @@ class MessageModelTestCase(TestCase):
         Test basic Message model.
         """
 
-        assert False
+        with app.app_context():
+            msg = db.session.get(Message, self.msg0_id)
+
+        # Message should have the correct attributes/types
+        self.assertEqual(msg.text, "Message text 0")
+        self.assertIsInstance(msg.timestamp, datetime)
+
+        # Message should have the correct user ID
+        msg.user_id = self.user0_id
 
     def test_message_user_relationship(self):
         """
-        Test that a user is associated with the expected messages.
+        Test that a user is associated with the expected messages and vice versa.
         """
 
-        assert False
+        with app.app_context():
+            user = db.session.get(User, self.user0_id)
+            msg0 = db.session.get(Message, self.msg0_id)
+            msg1 = db.session.get(Message, self.msg1_id)
+
+            self.assertIs(msg0.user, user)
+            self.assertIs(msg1.user, user)
+
+            u_messages = user.messages
+            self.assertEqual(len(u_messages), 2)
+            self.assertIn(msg0, u_messages)
+            self.assertIn(msg1, u_messages)
 
     def test_repr(self):
         """
         Test message __repr__ method output.
         """
 
-        assert False
+        with app.app_context():
+            msg0 = db.session.get(Message, self.msg0_id)
+            self.assertEqual(repr(msg0), f"<Message #{self.msg0_id}: User #{msg0.user.id}>")
