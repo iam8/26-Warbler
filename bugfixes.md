@@ -15,3 +15,10 @@ Unit 26: Warbler<br>
 - File edit.jinja2: fixed href link for cancel button
 - File app.py, signup view: fixed IntegrityError flash message to indicate that username OR email
 is already taken
+
+- File tests/test_user_model.py: connect explicitly to test database
+- File tests/test_user_model.py: edited name of test database to include an underscore instead of a
+hyphen (Postres complained)
+- File tests/test_user_model.py: added app contexts around code that needs it
+- File tests/test_user_model.py: add database commit after emptying tables in setUp
+- File tests/test_user_model.py: add tearDown method
