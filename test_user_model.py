@@ -82,14 +82,14 @@ class UserModelTestCase(TestCase):
             self.assertEqual(len(user.followers), 0)
             self.assertEqual(len(user.following), 0)
 
-            # User should have the correct attributes
-            self.assertEqual(user.email, "test2@test.com")
-            self.assertEqual(user.username, "testuser2")
-            self.assertEqual(user.image_url, "/static/images/default-pic.png")
-            self.assertEqual(user.header_image_url, "/static/images/warbler-hero.jpg")
-            self.assertIsNone(user.bio)
-            self.assertIsNone(user.location)
-            self.assertEqual(user.password, "HASHED_PASSWORD")
+        # User should have the correct attributes
+        self.assertEqual(user.email, "test2@test.com")
+        self.assertEqual(user.username, "testuser2")
+        self.assertEqual(user.image_url, "/static/images/default-pic.png")
+        self.assertEqual(user.header_image_url, "/static/images/warbler-hero.jpg")
+        self.assertIsNone(user.bio)
+        self.assertIsNone(user.location)
+        self.assertEqual(user.password, "HASHED_PASSWORD")
 
     def test_repr(self):
         """
@@ -100,3 +100,32 @@ class UserModelTestCase(TestCase):
             user0 = db.session.get(User, self.user0_id)
 
         self.assertEqual(repr(user0), f"<User #{self.user0_id}: testuser, test@test.com>")
+
+    def test_is_following_true(self):
+        """
+        Test that is_following() successfully detects when a user is and is not following another.
+        """
+
+        user1 = User(
+            email="test1@test.com",
+            username="testuser1",
+            password="HASHED_PASSWORD1"
+        )
+
+        user2 = User(
+            email="test2@test.com",
+            username="testuser2",
+            password="HASHED_PASSWORD2"
+        )
+
+        with app.app_context():
+            db.session.add_all([user1, user2])
+            db.session.commit()
+
+            user0 = db.session.get(User, self.user0_id)
+            user0.following.append(user1)
+
+            self.assertTrue(user0.is_following(user1))
+            self.assertFalse(user0.is_following(user2))
+
+
