@@ -67,6 +67,18 @@ class UserModelTestCase(TestCase):
             db.session.add(user)
             db.session.commit()
 
-            # User should have no messages & no followers
+            # User should have no messages, likes, followers, and following
             self.assertEqual(len(user.messages), 0)
+            self.assertEqual(len(user.likes), 0)
             self.assertEqual(len(user.followers), 0)
+            self.assertEqual(len(user.following), 0)
+
+            # User should have the correct attributes
+            self.assertEqual(user.email, "test@test.com")
+            self.assertEqual(user.username, "testuser")
+            self.assertEqual(user.image_url, "/static/images/default-pic.png")
+            self.assertEqual(user.header_image_url, "/static/images/warbler-hero.jpg")
+            self.assertIsNone(user.bio)
+            self.assertIsNone(user.location)
+            self.assertEqual(user.password, "HASHED_PASSWORD")
+
