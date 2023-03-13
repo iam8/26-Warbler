@@ -155,3 +155,24 @@ class UserModelTestCase(TestCase):
 
             self.assertTrue(user0.is_followed_by(user1))
             self.assertFalse(user0.is_followed_by(user2))
+
+    def test_signup_success(self):
+        """
+        Test that a new user is created, given valid credentials.
+        """
+
+    def test_signup_failure(self):
+        """
+        Test that a new user is not created, given invalid credentials.
+        """
+
+    def test_authentication_success(self):
+        """
+        Test that the correct user is returned when valid credentials (username and password) are
+        given.
+        """
+
+    def test_authentication_failure(self):
+        """
+        Test that no user is returned when invalid credentials are given.
+        """
