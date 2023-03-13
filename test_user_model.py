@@ -161,7 +161,15 @@ class UserModelTestCase(TestCase):
         Test that a new user is created, given valid credentials.
         """
 
-        assert False
+        with app.app_context():
+            user = User.signup("signupuser", "signup@test.com", "SIGNUPPW", "imageurl")
+            db.session.commit()
+
+            self.assertIsInstance(user, User)
+            self.assertEqual(user.email, "signup@test.com")
+            self.assertEqual(user.username, "signupuser")
+            self.assertEqual(user.image_url, "imageurl")
+            self.assertTrue(user.password.startswith("$2b"))
 
     def test_signup_failure(self):
         """
