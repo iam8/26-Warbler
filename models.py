@@ -224,6 +224,14 @@ class Message(db.Model):
 
     user = db.relationship('User', back_populates="messages")
 
+    def __repr__(self):
+        """
+        Return a string representation of a Message, which includes Message ID and the ID of the
+        user associated with that message,
+        """
+
+        return f"<Message #{self.id}: User #{self.user_id}>"
+
 
 def connect_db(app):
     """
