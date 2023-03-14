@@ -469,4 +469,96 @@ class UserViewTestCase(TestCase):
 
     # TODO
 
+    def test_add_follow_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to add a follow.
+        """
+
+    def test_add_follow_self(self):
+        """
+        For logged-in users:
+
+        Test that a user cannot follow themselves.
+        """
+
+    def test_add_follow_existing(self):
+        """
+        For logged-in users:
+
+        Test that nothing changes if a user tries to follow someone they are already following.
+        """
+
+    def test_add_follow(self):
+        """
+        For logged-in users:
+
+        Test that a user can successfully follow another user.
+        """
+
+    def test_stop_following_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to remove a follow.
+        """
+
+    def test_stop_following_nonexistent(self):
+        """
+        For logged-in users:
+
+        Test that nothing changes if a user tries to unfollow a user that they were not following
+        in the first place.
+        """
+
+    def test_stop_following(self):
+        """
+        For logged-in users:
+
+        Test that a user can successfully remove a follow.
+        """
+
+    def test_add_like_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to add a like.
+        """
+
+    def test_add_like_self(self):
+        """
+        For logged-in users:
+
+        Test that a user cannot like their own message.
+        """
+
+    def test_add_like_existing(self):
+        """
+        For logged-in users:
+
+        Test that nothing changes if a user tries to like a message they already liked.
+        """
+
+    def test_add_like(self):
+        """
+        For logged-in users:
+
+        Test that a user can successfully add a like.
+        """
+
+    def test_remove_like_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to remove a like.
+        """
+
+    def test_remove_like_nonexistent(self):
+        """
+        For logged-in users:
+
+        Test that nothing changes if a user tries to remove a like that they were not liking in the
+        first place.
+        """
+
+    def test_remove_like(self):
+        """
+        For logged-in users:
+
+        Test that a user can successfully remove a like.
+        """
+
     # ---------------------------------------------------------------------------------------------
