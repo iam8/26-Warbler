@@ -202,4 +202,29 @@ class MessageViewTestCase(TestCase):
 
     # TESTS FOR DELETING MESSAGES -----------------------------------------------------------------
 
+    def test_delete_message_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to delete a message.
+        """
+
+        with app.app_context():
+
+            # Add message for initial user
+            msg = Message(text="Message text",
+                          user_id=self.user_id)
+
+            db.session.add(msg)
+            db.session.commit()
+
+            init_num_msgs = Message.query.count()
+
+            with self.client as c:
+                resp = c.post(f"/messages/{msg.id}/delete")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            # Check that no message was deleted
+            self.assertEqual(Message.query.count(), init_num_msgs)
+
     # ---------------------------------------------------------------------------------------------
