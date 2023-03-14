@@ -67,13 +67,33 @@ class MessageViewTestCase(TestCase):
 
         return super().tearDown()
 
-    def test_add_message(self):
+# TESTS FOR LOGGED-IN USERS -----------------------------------------------------------------------
+
+    def test_add_message_form(self):
         """
-        Can users successfully add a message?
+        For logged-in users:
+
+        Test that accessing the page for new messages displays a form for adding new messages.
         """
 
-        # Since we need to change the session to mimic logging in, we need to use the
-        # changing-session trick:
+        # Change session to mimic logging in
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.user_id
+
+            resp = c.get("/messages/new")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('form method="POST"', html)
+
+    def test_add_message_as_self(self):
+        """
+        For logged-in users:
+
+        Can users successfully add a message as themselves?
+        """
+
         with self.client as c:
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.user_id
@@ -87,3 +107,6 @@ class MessageViewTestCase(TestCase):
 
             msg = db.session.scalars(select(Message)).one()
             self.assertEqual(msg.text, "Hello")
+            self.assertEqual(msg.user.id, self.user_id)
+
+
