@@ -271,11 +271,40 @@ class UserViewTestCase(TestCase):
         """
 
         with self.client as c:
-            # resp = c.get(f"/users/{self.user0_id}/likes")
             resp = c.post("/users/delete")
 
             self.assertEqual(resp.status_code, 302)
             self.assertEqual(resp.location, "/")
+
+    def test_delete_user(self):
+        """
+        For logged-in users:
+
+        Test that a user is successfully deleted.
+        """
+
+        with app.app_context():
+            curr_user = db.session.get(User, self.user0_id)
+            init_num_users = User.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0 and delete the user
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post("/users/delete")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/signup")
+
+            # Check that we are now logged out
+            # self.assertNotIn(CURR_USER_KEY, sess)
+
+            # Check that the correct user was deleted
+            users = User.query.all()
+            self.assertEqual(len(users), init_num_users - 1)
+            self.assertNotIn(curr_user, users)
 
     # ---------------------------------------------------------------------------------------------
 
