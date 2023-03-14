@@ -7,7 +7,7 @@ User view tests.
 
 from unittest import TestCase
 
-from app import app
+from app import app, CURR_USER_KEY
 from models import db, connect_db, User
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///warbler_test"
@@ -131,6 +131,90 @@ class UserViewTestCase(TestCase):
 
             self.assertIn('<h4 id="sidebar-username">@testuser0</h4>', html0)
             self.assertIn('<h4 id="sidebar-username">@testuser1</h4>', html1)
+
+    def test_show_following_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to access any user's
+        following display page.
+        """
+
+        with self.client as c:
+            resp = c.get(f"/users/{self.user0_id}/following")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_show_following(self):
+        """
+        For logged-in users:
+
+        Test that a user can view a display of users they are following, as well as a display of
+        users that another user is following.
+        """
+
+        with self.client as c:
+
+            # 'Log in' as user 0
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.user0_id
+
+            resp_self = c.get(f"/users/{self.user0_id}/following")
+            resp_other = c.get(f"/users/{self.user1_id}/following")
+
+            html_self = resp_self.get_data(as_text=True)
+            html_other = resp_other.get_data(as_text=True)
+
+            self.assertEqual(resp_self.status_code, 200)
+            self.assertEqual(resp_other.status_code, 200)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser0</h4>', html_self)
+            self.assertIn('<h1 class="display-6">Users That This User is Following</h1>',
+                          html_self)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser1</h4>', html_other)
+            self.assertIn('<h1 class="display-6">Users That This User is Following</h1>',
+                          html_other)
+
+    def test_show_followers_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to access any user's
+        followers display page.
+        """
+
+        with self.client as c:
+            resp = c.get(f"/users/{self.user0_id}/followers")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_show_followers(self):
+        """
+        For logged-in users:
+
+        Test that a user can view a display of their followers, as well as a display of the
+        followers of another user.
+        """
+
+        with self.client as c:
+
+            # 'Log in' as user 0
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.user0_id
+
+            resp_self = c.get(f"/users/{self.user0_id}/followers")
+            resp_other = c.get(f"/users/{self.user1_id}/followers")
+
+            html_self = resp_self.get_data(as_text=True)
+            html_other = resp_other.get_data(as_text=True)
+
+            self.assertEqual(resp_self.status_code, 200)
+            self.assertEqual(resp_other.status_code, 200)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser0</h4>', html_self)
+            self.assertIn('<h1 class="display-6">Followers</h1>', html_self)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser1</h4>', html_other)
+            self.assertIn('<h1 class="display-6">Followers</h1>', html_other)
 
     # ---------------------------------------------------------------------------------------------
 
