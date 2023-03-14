@@ -296,6 +296,91 @@ class UserViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
             self.assertIn('<h2 class="join-message">Edit Your Profile.</h2>', html)
 
+    def test_update_profile_failed_auth(self):
+        """
+        For logged-in users:
+
+        Test that the user is redirected and not updated if password authentication fails.
+        """
+
+        # Add new user with encrypted password
+        with app.app_context():
+            hashed_pw = bcrypt.generate_password_hash("EXTRA_PW").decode('UTF-8')
+            extra_user = User(username="extra",
+                              password=hashed_pw,
+                              email="extra@extra.com")
+
+            db.session.add(extra_user)
+            db.session.commit()
+
+            with self.client as c:
+
+                # 'Log in' as new user
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = extra_user.id
+
+                resp = c.post("/users/profile", data={"username": "NEW_UNAME",
+                                                      "email": "NEW_EMAIL@EMAIL.COM",
+                                                      "image_url": "NEW_IMAGE_URL",
+                                                      "header_image_url": "NEW_HEADER_IMG",
+                                                      "bio": "NEW BIO",
+                                                      "password": "WRONG_PW"})
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+            # Check that user attributes have not been changed
+            self.assertEqual(extra_user.username, "extra")
+            self.assertEqual(extra_user.email, "extra@extra.com")
+            self.assertEqual(extra_user.image_url, User.image_url.server_default.arg)
+            self.assertEqual(extra_user.header_image_url, User.header_image_url.server_default.arg)
+            self.assertIsNone(extra_user.location)
+            self.assertIsNone(extra_user.bio)
+
+    def test_update_profile_invalid_inputs(self):
+        """
+        For logged-in users:
+
+        Test that the profile page is re-rendered and that the user is not updated if invalid
+        inputs are given (existing username or email).
+        """
+
+        # Add new user with encrypted password
+        with app.app_context():
+            hashed_pw = bcrypt.generate_password_hash("EXTRA_PW").decode('UTF-8')
+            extra_user = User(username="extra",
+                              password=hashed_pw,
+                              email="extra@extra.com")
+
+            db.session.add(extra_user)
+            db.session.commit()
+
+            with self.client as c:
+
+                # 'Log in' as new user
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = extra_user.id
+
+                resp = c.post("/users/profile", data={"username": "testuser0",
+                                                      "email": "test0@test.com",
+                                                      "image_url": "NEW_IMAGE_URL",
+                                                      "header_image_url": "NEW_HEADER_IMG",
+                                                      "bio": "NEW BIO",
+                                                      "password": "EXTRA_PW"})
+
+                html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<h2 class="join-message">Edit Your Profile.</h2>', html)
+
+            # Check that user attributes have not been changed
+            self.assertEqual(extra_user.username, "extra")
+            self.assertEqual(extra_user.email, "extra@extra.com")
+            self.assertEqual(extra_user.image_url, User.image_url.server_default.arg)
+            self.assertEqual(extra_user.header_image_url, User.header_image_url.server_default.arg)
+            self.assertIsNone(extra_user.location)
+            self.assertIsNone(extra_user.bio)
+
     def test_update_profile(self):
         """
         For logged-in users:
