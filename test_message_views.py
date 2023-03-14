@@ -111,7 +111,6 @@ class MessageViewTestCase(TestCase):
             with c.session_transaction() as sess:
                 sess[CURR_USER_KEY] = self.user_id
 
-            # Now, that session setting is saved, so we can have the rest of our tests
             resp = c.post("/messages/new", data={"text": "Hello"})
 
             # Make sure it redirects
@@ -144,6 +143,7 @@ class MessageViewTestCase(TestCase):
         Test that a user can view their own message.
         """
 
+        # Add message
         msg = Message(text="Message text",
                       user_id=self.user_id)
 
@@ -151,6 +151,7 @@ class MessageViewTestCase(TestCase):
             db.session.add(msg)
             db.session.commit()
 
+            # 'Log in' as first user and view message
             with self.client as c:
                 with c.session_transaction() as sess:
                     sess[CURR_USER_KEY] = self.user_id
@@ -186,7 +187,7 @@ class MessageViewTestCase(TestCase):
             db.session.add(msg1)
             db.session.commit()
 
-            # 'Log in' as first user
+            # 'Log in' as first user and view message
             with self.client as c:
                 with c.session_transaction() as sess:
                     sess[CURR_USER_KEY] = self.user_id
@@ -218,6 +219,7 @@ class MessageViewTestCase(TestCase):
 
             init_num_msgs = Message.query.count()
 
+            # Try deleting a message
             with self.client as c:
                 resp = c.post(f"/messages/{msg.id}/delete")
 
