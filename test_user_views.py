@@ -298,9 +298,6 @@ class UserViewTestCase(TestCase):
                 self.assertEqual(resp.status_code, 302)
                 self.assertEqual(resp.location, "/signup")
 
-            # Check that we are now logged out
-            # self.assertNotIn(CURR_USER_KEY, sess)
-
             # Check that the correct user was deleted
             users = User.query.all()
             self.assertEqual(len(users), init_num_users - 1)
