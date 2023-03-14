@@ -6,10 +6,9 @@ User view tests.
 """
 
 from unittest import TestCase
-from sqlalchemy import select
 
-from app import app, CURR_USER_KEY
-from models import db, connect_db, User, Follow
+from app import app
+from models import db, connect_db, User
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///warbler_test"
 app.config['SQLALCHEMY_ECHO'] = False
