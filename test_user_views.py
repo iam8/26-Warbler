@@ -86,6 +86,35 @@ class UserViewTestCase(TestCase):
 
     # TESTS FOR VIEWING USER INFO -----------------------------------------------------------------
 
+    def test_list_users(self):
+        """
+        Test that all users are displayed by default on the users listing page.
+        """
+
+        with self.client as c:
+            resp = c.get("/users")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            for username in ["testuser0", "testuser1", "testuser2", "testuser3"]:
+                self.assertIn(username, html)
+
+    def test_list_users_search(self):
+        """
+        Test that only a single user is displayed on page when search (by username) is used.
+        """
+
+        with self.client as c:
+            resp = c.get("/users", query_string={"q": "testuser3"})
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("testuser3", html)
+
+            for username in ["testuser0", "testuser1", "testuser2"]:
+                self.assertNotIn(username, html)
+
     # ---------------------------------------------------------------------------------------------
 
     # TESTS FOR AUTH: SIGNUP, LOGIN, LOGOUT -------------------------------------------------------
