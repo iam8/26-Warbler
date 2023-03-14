@@ -193,7 +193,7 @@ def show_following(user_id):
 
 
 @app.route('/users/<int:user_id>/followers')
-def users_followers(user_id):
+def show_followers(user_id):
     """
     Show list of followers of this user.
     """
