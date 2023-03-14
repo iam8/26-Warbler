@@ -126,7 +126,7 @@ class MessageViewTestCase(TestCase):
 
     # TESTS FOR SHOWING MESSAGES ------------------------------------------------------------------
 
-    def test_view_messages_logged_out(self):
+    def test_view_message_logged_out(self):
         """
         Test that logged-out users will be redirected to homepage if they try to view any message.
         """
@@ -137,7 +137,7 @@ class MessageViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 302)
             self.assertEqual(resp.location, "/")
 
-    def test_view_own_messages(self):
+    def test_view_own_message(self):
         """
         For logged-in users:
 
@@ -162,7 +162,7 @@ class MessageViewTestCase(TestCase):
                 self.assertIn('class="single-message"', html)
                 self.assertIn(msg.text, html)
 
-    def test_view_other_messages(self):
+    def test_view_other_message(self):
         """
         For logged-in users:
 
@@ -219,6 +219,81 @@ class MessageViewTestCase(TestCase):
             init_num_msgs = Message.query.count()
 
             with self.client as c:
+                resp = c.post(f"/messages/{msg.id}/delete")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            # Check that no message was deleted
+            self.assertEqual(Message.query.count(), init_num_msgs)
+
+    def test_delete_own_message(self):
+        """
+        For logged-in users:
+
+        Test that a user can delete their own message.
+        """
+
+        with app.app_context():
+
+            # Add messages for user
+            msg0 = Message(text="Message text 0",
+                           user_id=self.user_id)
+
+            msg1 = Message(text="Message text 1",
+                           user_id=self.user_id)
+
+            db.session.add_all([msg0, msg1])
+            db.session.commit()
+
+            init_num_msgs = Message.query.count()
+
+            # 'Log in' and delete a message
+            with self.client as c:
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user_id
+
+                resp = c.post(f"/messages/{msg0.id}/delete")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, f"/users/{self.user_id}")
+
+            # Check that correct message was deleted
+            msgs = Message.query.all()
+            self.assertEqual(len(msgs), init_num_msgs - 1)
+            self.assertIn(msg1, msgs)
+
+    def test_delete_other_message(self):
+        """
+        For logged-in users:
+
+        Test that a user can NOT delete the message of another user.
+        """
+
+        with app.app_context():
+
+            # Add new user
+            user1 = User.signup(username="testuser1",
+                                email="test1@test.com",
+                                password="testuser1",
+                                image_url=None)
+
+            db.session.commit()
+
+            # Add message for new user
+            msg = Message(text="Message text 1",
+                          user_id=user1.id)
+
+            db.session.add(msg)
+            db.session.commit()
+
+            init_num_msgs = Message.query.count()
+
+            # 'Log in' as initial user and try deleting a message
+            with self.client as c:
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user_id
+
                 resp = c.post(f"/messages/{msg.id}/delete")
 
                 self.assertEqual(resp.status_code, 302)
