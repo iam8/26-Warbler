@@ -259,15 +259,23 @@ class UserViewTestCase(TestCase):
 
     # ---------------------------------------------------------------------------------------------
 
-    # TESTS FOR AUTH: SIGNUP, LOGIN, LOGOUT -------------------------------------------------------
-
-    # ---------------------------------------------------------------------------------------------
-
     # TESTS FOR UPDATING USER PROFILE -------------------------------------------------------------
 
     # ---------------------------------------------------------------------------------------------
 
     # TESTS FOR DELETING A USER -------------------------------------------------------------------
+
+    def test_delete_user_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to delete a user.
+        """
+
+        with self.client as c:
+            # resp = c.get(f"/users/{self.user0_id}/likes")
+            resp = c.post("/users/delete")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
 
     # ---------------------------------------------------------------------------------------------
 
