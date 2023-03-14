@@ -5,10 +5,6 @@
 Message view tests.
 """
 
-# run these tests like:
-#
-#    FLASK_ENV=production python -m unittest test_message_views.py
-
 from unittest import TestCase
 from sqlalchemy import select
 
@@ -34,8 +30,6 @@ class MessageViewTestCase(TestCase):
     """
     Test views for messages.
     """
-
-    print("In setup function!")
 
     def setUp(self):
         """
