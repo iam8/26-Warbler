@@ -114,6 +114,24 @@ class UserViewTestCase(TestCase):
             for username in ["testuser0", "testuser1", "testuser2"]:
                 self.assertNotIn(username, html)
 
+    def test_show_user_profile(self):
+        """
+        Test displaying of a user profile page.
+        """
+
+        with self.client as c:
+            resp0 = c.get(f"/users/{self.user0_id}")
+            resp1 = c.get(f"/users/{self.user1_id}")
+
+            html0 = resp0.get_data(as_text=True)
+            html1 = resp1.get_data(as_text=True)
+
+            self.assertEqual(resp0.status_code, 200)
+            self.assertEqual(resp1.status_code, 200)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser0</h4>', html0)
+            self.assertIn('<h4 id="sidebar-username">@testuser1</h4>', html1)
+
     # ---------------------------------------------------------------------------------------------
 
     # TESTS FOR AUTH: SIGNUP, LOGIN, LOGOUT -------------------------------------------------------
