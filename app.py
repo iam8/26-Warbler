@@ -392,11 +392,12 @@ def messages_destroy(message_id):
     Delete a message.
     """
 
-    if not g.user:
+    msg = db.session.get(Message, message_id)
+
+    if not g.user or g.user is not msg.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    msg = Message.query.get(message_id)
     db.session.delete(msg)
     db.session.commit()
 
