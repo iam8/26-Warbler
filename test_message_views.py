@@ -67,7 +67,19 @@ class MessageViewTestCase(TestCase):
 
         return super().tearDown()
 
-# TESTS FOR LOGGED-IN USERS -----------------------------------------------------------------------
+# TESTS FOR ADDING MESSAGES -----------------------------------------------------------------------
+
+    def test_add_message_form_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to access the page
+        for adding new messages.
+        """
+
+        with self.client as c:
+            resp = c.get("/messages/new")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
 
     def test_add_message_form(self):
         """
@@ -108,5 +120,3 @@ class MessageViewTestCase(TestCase):
             msg = db.session.scalars(select(Message)).one()
             self.assertEqual(msg.text, "Hello")
             self.assertEqual(msg.user.id, self.user_id)
-
-
