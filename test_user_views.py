@@ -216,6 +216,47 @@ class UserViewTestCase(TestCase):
             self.assertIn('<h4 id="sidebar-username">@testuser1</h4>', html_other)
             self.assertIn('<h1 class="display-6">Followers</h1>', html_other)
 
+    def test_display_likes_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to access any user's
+        likes display page.
+        """
+
+        with self.client as c:
+            resp = c.get(f"/users/{self.user0_id}/likes")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_display_likes(self):
+        """
+        For logged-in users:
+
+        Test that a user can view a display of their likes, as well as a display of the likes of
+        another user.
+        """
+
+        with self.client as c:
+
+            # 'Log in' as user 0
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.user0_id
+
+            resp_self = c.get(f"/users/{self.user0_id}/likes")
+            resp_other = c.get(f"/users/{self.user1_id}/likes")
+
+            html_self = resp_self.get_data(as_text=True)
+            html_other = resp_other.get_data(as_text=True)
+
+            self.assertEqual(resp_self.status_code, 200)
+            self.assertEqual(resp_other.status_code, 200)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser0</h4>', html_self)
+            self.assertIn('<h1 class="display-6">Liked Warbles</h1>', html_self)
+
+            self.assertIn('<h4 id="sidebar-username">@testuser1</h4>', html_other)
+            self.assertIn('<h1 class="display-6">Liked Warbles</h1>', html_other)
+
     # ---------------------------------------------------------------------------------------------
 
     # TESTS FOR AUTH: SIGNUP, LOGIN, LOGOUT -------------------------------------------------------
