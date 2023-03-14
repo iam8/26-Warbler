@@ -6,6 +6,7 @@ User view tests.
 """
 
 from unittest import TestCase
+from flask_bcrypt import Bcrypt
 
 from app import app, CURR_USER_KEY
 from models import db, connect_db, User
@@ -18,6 +19,8 @@ app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 
 # Don't have WTForms use CSRF at all, since it's a pain to test
 app.config['WTF_CSRF_ENABLED'] = False
+
+bcrypt = Bcrypt()
 
 connect_db(app)
 
@@ -260,6 +263,78 @@ class UserViewTestCase(TestCase):
     # ---------------------------------------------------------------------------------------------
 
     # TESTS FOR UPDATING USER PROFILE -------------------------------------------------------------
+
+    def test_update_profile_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to access a profile
+        edit page.
+        """
+
+        with self.client as c:
+            resp = c.get("/users/profile")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_update_profile_form(self):
+        """
+        For logged-in users:
+
+        Test that the form for updating a user profile is displayed when accessing a user profile
+        page.
+        """
+
+        with self.client as c:
+
+            # 'Log in' as user 0
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.user0_id
+
+            resp = c.get("/users/profile")
+            html = resp.get_data(as_text=True)
+
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('<h2 class="join-message">Edit Your Profile.</h2>', html)
+
+    def test_update_profile(self):
+        """
+        For logged-in users:
+
+        Test that a user can successfully update their profile.
+        """
+
+        # Add new user with encrypted password
+        with app.app_context():
+            hashed_pw = bcrypt.generate_password_hash("EXTRA_PW").decode('UTF-8')
+            extra_user = User(username="extra",
+                              password=hashed_pw,
+                              email="extra@extra.com")
+
+            db.session.add(extra_user)
+            db.session.commit()
+
+            with self.client as c:
+
+                # 'Log in' as new user
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = extra_user.id
+
+                resp = c.post("/users/profile", data={"username": "NEW_UNAME",
+                                                      "email": "NEW_EMAIL@EMAIL.COM",
+                                                      "image_url": "NEW_IMAGE_URL",
+                                                      "header_image_url": "NEW_HEADER_IMG",
+                                                      "bio": "NEW BIO",
+                                                      "password": "EXTRA_PW"})
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, f"/users/{extra_user.id}")
+
+            # Check that user attributes have been changed accordingly
+            self.assertEqual(extra_user.username, "NEW_UNAME")
+            self.assertEqual(extra_user.email, "NEW_EMAIL@EMAIL.COM")
+            self.assertEqual(extra_user.image_url, "NEW_IMAGE_URL")
+            self.assertEqual(extra_user.header_image_url, "NEW_HEADER_IMG")
+            self.assertEqual(extra_user.bio, "NEW BIO")
 
     # ---------------------------------------------------------------------------------------------
 
