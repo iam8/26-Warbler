@@ -9,7 +9,7 @@ from unittest import TestCase
 from sqlalchemy import select
 
 from app import app, CURR_USER_KEY
-from models import db, connect_db, User
+from models import db, connect_db, User, Follow
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///warbler_test"
 app.config['SQLALCHEMY_ECHO'] = False
@@ -40,15 +40,36 @@ class UserViewTestCase(TestCase):
             User.query.delete()
 
             user0 = User(
-                email="test@test.com",
-                username="testuser",
-                password="HASHED_PASSWORD"
+                email="test0@test.com",
+                username="testuser0",
+                password="HASHED_PASSWORD0"
             )
 
-            db.session.add(user0)
+            user1 = User(
+                email="test1@test.com",
+                username="testuser1",
+                password="HASHED_PASSWORD1"
+            )
+
+            user2 = User(
+                email="test2@test.com",
+                username="testuser2",
+                password="HASHED_PASSWORD2"
+            )
+
+            user3 = User(
+                email="test3@test.com",
+                username="testuser3",
+                password="HASHED_PASSWORD3"
+            )
+
+            db.session.add_all([user0, user1, user2, user3])
             db.session.commit()
 
             self.user0_id = user0.id
+            self.user1_id = user1.id
+            self.user2_id = user2.id
+            self.user3_id = user3.id
 
         self.client = app.test_client()
         return super().setUp()
@@ -62,3 +83,23 @@ class UserViewTestCase(TestCase):
             db.session.rollback()
 
         return super().tearDown()
+
+    # TESTS FOR VIEWING USER INFO -----------------------------------------------------------------
+
+    # ---------------------------------------------------------------------------------------------
+
+    # TESTS FOR AUTH: SIGNUP, LOGIN, LOGOUT -------------------------------------------------------
+
+    # ---------------------------------------------------------------------------------------------
+
+    # TESTS FOR UPDATING USER PROFILE -------------------------------------------------------------
+
+    # ---------------------------------------------------------------------------------------------
+
+    # TESTS FOR DELETING A USER -------------------------------------------------------------------
+
+    # ---------------------------------------------------------------------------------------------
+
+    # TESTS FOR ADDING/REMOVING LIKES AND FOLLOWING -----------------------------------------------
+
+    # ---------------------------------------------------------------------------------------------
