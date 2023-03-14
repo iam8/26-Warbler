@@ -257,7 +257,7 @@ class MessageViewTestCase(TestCase):
             # Check that correct message was deleted
             msgs = Message.query.all()
             self.assertEqual(len(msgs), init_num_msgs - 1)
-            self.assertIn(msg1, msgs)
+            self.assertNotIn(msg0, msgs)
 
     def test_delete_other_message(self):
         """
