@@ -382,7 +382,7 @@ def messages_show(message_id):
     Show a message.
     """
 
-    msg = Message.query.get(message_id)
+    msg = db.session.get(Message, message_id)
     return render_template('messages/show.jinja2', message=msg)
 
 
