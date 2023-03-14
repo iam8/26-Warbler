@@ -313,8 +313,8 @@ def profile():
         user.username = form.username.data
         user.email = form.email.data
         user.image_url = form.image_url.data or User.image_url.server_default.arg
-        user.header_img_url = (form.header_image_url.data or
-                               User.header_image_url.server_default.arg)
+        user.header_image_url = (form.header_image_url.data or
+                                 User.header_image_url.server_default.arg)
         user.bio = form.bio.data or None
 
         # Handle case where username or email is already taken
