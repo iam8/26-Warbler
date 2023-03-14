@@ -67,7 +67,7 @@ class MessageViewTestCase(TestCase):
 
         return super().tearDown()
 
-# TESTS FOR ADDING MESSAGES -----------------------------------------------------------------------
+    # TESTS FOR ADDING MESSAGES -------------------------------------------------------------------
 
     def test_add_message_form_logged_out(self):
         """
@@ -98,6 +98,7 @@ class MessageViewTestCase(TestCase):
 
             self.assertEqual(resp.status_code, 200)
             self.assertIn('form method="POST"', html)
+            self.assertIn("What&#39;s happening?", html)
 
     def test_add_message_as_self(self):
         """
@@ -120,3 +121,85 @@ class MessageViewTestCase(TestCase):
             msg = db.session.scalars(select(Message)).one()
             self.assertEqual(msg.text, "Hello")
             self.assertEqual(msg.user.id, self.user_id)
+
+    # ---------------------------------------------------------------------------------------------
+
+    # TESTS FOR SHOWING MESSAGES ------------------------------------------------------------------
+
+    def test_view_messages_logged_out(self):
+        """
+        Test that logged-out users will be redirected to homepage if they try to view any message.
+        """
+
+        with self.client as c:
+            resp = c.get("/messages/new")
+
+            self.assertEqual(resp.status_code, 302)
+            self.assertEqual(resp.location, "/")
+
+    def test_view_own_messages(self):
+        """
+        For logged-in users:
+
+        Test that a user can view their own message.
+        """
+
+        msg = Message(text="Message text",
+                      user_id=self.user_id)
+
+        with app.app_context():
+            db.session.add(msg)
+            db.session.commit()
+
+            with self.client as c:
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user_id
+
+                resp = c.get(f"/messages/{msg.id}")
+                html = resp.get_data(as_text=True)
+
+                self.assertEqual(resp.status_code, 200)
+                self.assertIn('class="single-message"', html)
+                self.assertIn(msg.text, html)
+
+    def test_view_other_messages(self):
+        """
+        For logged-in users:
+
+        Test that a user can view the messages of a different user.
+        """
+
+        with app.app_context():
+
+            # Add a new user
+            user1 = User.signup(username="testuser1",
+                                email="test1@test.com",
+                                password="testuser1",
+                                image_url=None)
+
+            db.session.commit()
+
+            # Add message for new user
+            msg1 = Message(text="Message text 1",
+                           user_id=user1.id)
+
+            db.session.add(msg1)
+            db.session.commit()
+
+            # 'Log in' as first user
+            with self.client as c:
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user_id
+
+                resp = c.get(f"/messages/{msg1.id}")
+                html = resp.get_data(as_text=True)
+
+                self.assertEqual(resp.status_code, 200)
+                self.assertIn('class="single-message"', html)
+                self.assertIn(msg1.text, html)
+
+    # ---------------------------------------------------------------------------------------------
+
+    # TESTS FOR DELETING MESSAGES -----------------------------------------------------------------
+
+    # ---------------------------------------------------------------------------------------------
