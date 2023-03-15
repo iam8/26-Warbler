@@ -497,6 +497,21 @@ class UserViewTestCase(TestCase):
         Test that a user cannot follow themselves.
         """
 
+        with app.app_context():
+            init_num_follows = Follow.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post(f"/users/follow/{self.user0_id}")
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(Follow.query.count(), init_num_follows)
+
     def test_add_follow_existing(self):
         """
         For logged-in users:
