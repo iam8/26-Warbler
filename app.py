@@ -1,8 +1,6 @@
 # Ioana A Mititean
 # Unit 26: Warbler (Twitter Clone)
 
-# TODO: implement url_for
-
 """
 Warbler app - Flask setup and config, routes, and views.
 """
