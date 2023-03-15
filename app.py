@@ -255,7 +255,13 @@ def stop_following(follow_id):
         return redirect("/")
 
     followed_user = db.get_or_404(User, follow_id)
-    g.user.following.remove(followed_user)
+
+    try:
+        g.user.following.remove(followed_user)
+    except ValueError:
+        db.session.rollback()
+        return redirect(f"/users/{g.user.id}/following")
+
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/following")
