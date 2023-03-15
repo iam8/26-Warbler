@@ -225,10 +225,16 @@ def display_likes(user_id):
 def add_follow(follow_id):
     """
     Add a follow for the currently-logged-in user.
+
+    Users cannot follow themselves.
     """
 
     if not g.user:
         flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    if follow_id == g.user.id:
+        flash("You cannot follow yourself!", "warning")
         return redirect("/")
 
     followed_user = db.get_or_404(User, follow_id)
