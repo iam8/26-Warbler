@@ -704,6 +704,30 @@ class UserViewTestCase(TestCase):
         Test that nothing changes if a user tries to like a message they already liked.
         """
 
+        # Create a new message for user 1
+        msg = Message(text="Message text", user_id=self.user1_id)
+
+        with app.app_context():
+            user0 = db.session.get(User, self.user0_id)
+            user0.likes.append(msg)
+
+            db.session.add(msg)
+            db.session.commit()
+
+            init_user0_likes = len(user0.likes)
+            init_num_likes = Like.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                c.post(f"/users/add_like/{msg.id}")
+
+            self.assertEqual(len(user0.likes), init_user0_likes)
+            self.assertEqual(Like.query.count(), init_num_likes)
+
     def test_add_like(self):
         """
         For logged-in users:
@@ -770,11 +794,60 @@ class UserViewTestCase(TestCase):
         first place.
         """
 
+        # Add a message to user 1
+        msg1 = Message(text="Message 1 text", user_id=self.user1_id)
+
+        with app.app_context():
+            db.session.add(msg1)
+            db.session.commit()
+
+            user0 = db.session.get(User, self.user0_id)
+            init_user0_likes = len(user0.likes)
+            init_likes_count = Like.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                c.post(f"/users/remove_like/{msg1.id}")
+
+            self.assertEqual(len(user0.likes), init_user0_likes)
+            self.assertEqual(Like.query.count(), init_likes_count)
+
     def test_remove_like(self):
         """
         For logged-in users:
 
         Test that a user can successfully remove a like.
         """
+
+        # Add a message to user 1
+        msg1 = Message(text="Message 1 text", user_id=self.user1_id)
+
+        with app.app_context():
+            db.session.add(msg1)
+            db.session.commit()
+
+            # Add this message as a like to user 0
+            user0 = db.session.get(User, self.user0_id)
+            user0.likes.append(msg1)
+
+            init_num_likes = Like.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post(f"/users/remove_like/{msg1.id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, f"/users/{self.user0_id}/likes")
+
+            self.assertNotIn(msg1, user0.likes)
+            self.assertEqual(Like.query.count(), init_num_likes - 1)
 
     # ---------------------------------------------------------------------------------------------
