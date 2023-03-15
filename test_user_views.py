@@ -622,6 +622,30 @@ class UserViewTestCase(TestCase):
         Test that a user can successfully remove a follow.
         """
 
+        with app.app_context():
+            user0 = db.session.get(User, self.user0_id)
+            user1 = db.session.get(User, self.user1_id)
+            user0.following.append(user1)
+
+            db.session.commit()
+
+            init_num_follows = Follow.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post(f"/users/stop_following/{self.user1_id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, f"/users/{self.user0_id}/following")
+
+            self.assertNotIn(user1, user0.following)
+            self.assertNotIn(user0, user1.followers)
+            self.assertEqual(Follow.query.count(), init_num_follows - 1)
+
     def test_add_like_logged_out(self):
         """
         Test that logged-out users will be redirected to homepage if they try to add a like, and
