@@ -238,7 +238,7 @@ def add_follow(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
-@app.route('/users/stop-following/<int:follow_id>', methods=['POST'])
+@app.route('/users/stop_following/<int:follow_id>', methods=['POST'])
 def stop_following(follow_id):
     """
     Have currently-logged-in-user stop following this user.
