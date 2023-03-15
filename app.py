@@ -1,12 +1,6 @@
 # Ioana A Mititean
 # Unit 26: Warbler (Twitter Clone)
 
-# TODO: check if a 'like' can be added to the database twice (i.e. once by clicking a like icon,)
-# and another by visiting the route directly. If so, find some way to prevent this
-
-# TODO: in the backend, implement a check to make sure the logged-in user can't like their own
-# messages
-
 """
 Warbler app - Flask setup and config, routes, and views.
 """
