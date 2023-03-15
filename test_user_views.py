@@ -519,6 +519,27 @@ class UserViewTestCase(TestCase):
         Test that nothing changes if a user tries to follow someone they are already following.
         """
 
+        # Create a new following: user0 follows user1
+        follow = Follow(user_being_followed_id=self.user1_id,
+                        user_following_id=self.user0_id)
+
+        with app.app_context():
+            db.session.add(follow)
+            db.session.commit()
+
+            init_num_follows = Follow.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                c.post(f"/users/follow/{self.user1_id}")
+
+            self.assertEqual(Follow.query.count(), init_num_follows)
+            self.assertIn(follow, Follow.query.all())
+
     def test_add_follow(self):
         """
         For logged-in users:
