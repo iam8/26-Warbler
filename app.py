@@ -302,7 +302,13 @@ def remove_like(msg_id):
         return redirect("/")
 
     message = db.session.get(Message, msg_id)
-    g.user.likes.remove(message)
+
+    try:
+        g.user.likes.remove(message)
+    except ValueError:
+        db.session.rollback()
+        return redirect(f"/users/{g.user.id}/likes")
+
     db.session.commit()
 
     return redirect(f"/users/{g.user.id}/likes")
