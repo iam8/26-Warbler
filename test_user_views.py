@@ -9,7 +9,7 @@ from unittest import TestCase
 from flask_bcrypt import Bcrypt
 
 from app import app, CURR_USER_KEY
-from models import db, connect_db, User
+from models import db, connect_db, User, Message, Follow, Like
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///warbler_test"
 app.config['SQLALCHEMY_ECHO'] = False
@@ -427,14 +427,20 @@ class UserViewTestCase(TestCase):
 
     def test_delete_user_logged_out(self):
         """
-        Test that logged-out users will be redirected to homepage if they try to delete a user.
+        Test that logged-out users will be redirected to homepage if they try to delete a user, and
+        that no user is deleted from the database.
         """
 
-        with self.client as c:
-            resp = c.post("/users/delete")
+        with app.app_context():
+            init_user_count = User.query.count()
 
-            self.assertEqual(resp.status_code, 302)
-            self.assertEqual(resp.location, "/")
+            with self.client as c:
+                resp = c.post("/users/delete")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(User.query.count(), init_user_count)
 
     def test_delete_user(self):
         """
@@ -467,12 +473,22 @@ class UserViewTestCase(TestCase):
 
     # TESTS FOR ADDING/REMOVING LIKES AND FOLLOWING -----------------------------------------------
 
-    # TODO
-
     def test_add_follow_logged_out(self):
         """
-        Test that logged-out users will be redirected to homepage if they try to add a follow.
+        Test that logged-out users will be redirected to homepage if they try to add a follow, and
+        that no new follow is added to database.
         """
+
+        with app.app_context():
+            init_num_follows = Follow.query.count()
+
+            with self.client as c:
+                resp = c.post(f"/users/follow/{self.user1_id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(Follow.query.count(), init_num_follows)
 
     def test_add_follow_self(self):
         """
@@ -497,8 +513,27 @@ class UserViewTestCase(TestCase):
 
     def test_stop_following_logged_out(self):
         """
-        Test that logged-out users will be redirected to homepage if they try to remove a follow.
+        Test that logged-out users will be redirected to homepage if they try to remove a follow,
+        and that no follow is removed from the database.
         """
+
+        # Create a new following: user1 follows user0
+        follow = Follow(user_being_followed_id=self.user0_id,
+                        user_following_id=self.user1_id)
+
+        with app.app_context():
+            db.session.add(follow)
+            db.session.commit()
+
+            init_follows_count = Follow.query.count()
+
+            with self.client as c:
+                resp = c.post(f"/users/stop_following/{self.user0_id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(Follow.query.count(), init_follows_count)
 
     def test_stop_following_nonexistent(self):
         """
@@ -517,8 +552,26 @@ class UserViewTestCase(TestCase):
 
     def test_add_like_logged_out(self):
         """
-        Test that logged-out users will be redirected to homepage if they try to add a like.
+        Test that logged-out users will be redirected to homepage if they try to add a like, and
+        that no likes are added to the database.
         """
+
+        # Add a message to user 0
+        msg0 = Message(text="Message 0 text", user_id=self.user0_id)
+
+        with app.app_context():
+            db.session.add(msg0)
+            db.session.commit()
+
+            init_like_count = Like.query.count()
+
+            with self.client as c:
+                resp = c.post(f"/users/add_like/{msg0.id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(Like.query.count(), init_like_count)
 
     def test_add_like_self(self):
         """
@@ -543,8 +596,30 @@ class UserViewTestCase(TestCase):
 
     def test_remove_like_logged_out(self):
         """
-        Test that logged-out users will be redirected to homepage if they try to remove a like.
+        Test that logged-out users will be redirected to homepage if they try to remove a like, and
+        that no likes are removed from the database.
         """
+
+        # Add a message to user 1
+        msg1 = Message(text="Message 1 text", user_id=self.user1_id)
+
+        with app.app_context():
+            db.session.add(msg1)
+            db.session.commit()
+
+            # Add this message as a like to user 0
+            user0 = db.session.get(User, self.user0_id)
+            user0.likes.append(msg1)
+
+            init_likes_count = Like.query.count()
+
+            with self.client as c:
+                resp = c.post(f"/users/remove_like/{msg1.id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(Like.query.count(), init_likes_count)
 
     def test_remove_like_nonexistent(self):
         """
