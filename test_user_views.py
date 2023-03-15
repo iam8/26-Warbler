@@ -599,6 +599,22 @@ class UserViewTestCase(TestCase):
         in the first place.
         """
 
+        with app.app_context():
+            user0 = db.session.get(User, self.user0_id)
+            init_user0_following = len(user0.following)
+            init_follows_count = Follow.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                c.post(f"/users/stop_following/{self.user1_id}")
+
+            self.assertEqual(len(user0.following), init_user0_following)
+            self.assertEqual(Follow.query.count(), init_follows_count)
+
     def test_stop_following(self):
         """
         For logged-in users:
