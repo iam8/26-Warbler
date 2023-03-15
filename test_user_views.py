@@ -547,6 +547,26 @@ class UserViewTestCase(TestCase):
         Test that a user can successfully follow another user.
         """
 
+        with app.app_context():
+            user0 = db.session.get(User, self.user0_id)
+            user1 = db.session.get(User, self.user1_id)
+            init_num_follows = Follow.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post(f"/users/follow/{self.user1_id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, f"/users/{self.user0_id}/following")
+
+            self.assertIn(user1, user0.following)
+            self.assertIn(user0, user1.followers)
+            self.assertEqual(Follow.query.count(), init_num_follows + 1)
+
     def test_stop_following_logged_out(self):
         """
         Test that logged-out users will be redirected to homepage if they try to remove a follow,
@@ -650,6 +670,30 @@ class UserViewTestCase(TestCase):
 
         Test that a user can successfully add a like.
         """
+
+        # Create a new message for user 1
+        msg = Message(text="Message text", user_id=self.user1_id)
+
+        with app.app_context():
+            db.session.add(msg)
+            db.session.commit()
+
+            user0 = db.session.get(User, self.user0_id)
+            init_num_likes = Like.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post(f"/users/add_like/{msg.id}")
+
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, f"/users/{self.user0_id}/likes")
+
+            self.assertIn(msg, user0.likes)
+            self.assertEqual(Like.query.count(), init_num_likes + 1)
 
     def test_remove_like_logged_out(self):
         """
