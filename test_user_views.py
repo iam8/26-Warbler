@@ -595,6 +595,27 @@ class UserViewTestCase(TestCase):
         Test that a user cannot like their own message.
         """
 
+        # Create a message for user 0
+        msg = Message(text="Message text", user_id=self.user0_id)
+
+        with app.app_context():
+            db.session.add(msg)
+            db.session.commit()
+
+            init_num_likes = Like.query.count()
+
+            with self.client as c:
+
+                # 'Log in' as user 0
+                with c.session_transaction() as sess:
+                    sess[CURR_USER_KEY] = self.user0_id
+
+                resp = c.post(f"/users/add_like/{msg.id}")
+                self.assertEqual(resp.status_code, 302)
+                self.assertEqual(resp.location, "/")
+
+            self.assertEqual(Like.query.count(), init_num_likes)
+
     def test_add_like_existing(self):
         """
         For logged-in users:
