@@ -265,6 +265,8 @@ def stop_following(follow_id):
 def add_like(msg_id):
     """
     Like a message for the currently-logged-in user.
+
+    Users cannot like their own messages.
     """
 
     if not g.user:
@@ -272,6 +274,11 @@ def add_like(msg_id):
         return redirect("/")
 
     message = db.session.get(Message, msg_id)
+
+    if message.user_id == g.user.id:
+        flash("You cannot like your own messages!")
+        return redirect("/")
+
     g.user.likes.append(message)
     db.session.commit()
 
