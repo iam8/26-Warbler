@@ -13,7 +13,7 @@
                 <div class="image-wrapper">
                     <img src="{{ g.user.header_image_url }}" alt="" class="card-hero">
                 </div>
-                <a href="/users/{{ g.user.id }}" class="card-link">
+                <a href="{{ url_for('users_show', user_id=g.user.id) }}" class="card-link">
                     <img src="{{ g.user.image_url }}"
                          alt="Image for {{ g.user.username }}"
                          class="card-image">
@@ -23,13 +23,15 @@
                     <li class="stat">
                         <p class="small">Messages</p>
                         <h4>
-                            <a href="/users/{{ g.user.id }}">{{ g.user.messages | length }}</a>
+                            <a href="{{ url_for('users_show', user_id=g.user.id) }}">
+                                {{ g.user.messages | length }}
+                            </a>
                         </h4>
                     </li>
                     <li class="stat">
                         <p class="small">Following</p>
                         <h4>
-                            <a href="/users/{{ g.user.id }}/following">
+                            <a href="{{ url_for('show_following', user_id=g.user.id) }}">
                                 {{ g.user.following | length }}
                             </a>
                         </h4>
@@ -37,7 +39,7 @@
                     <li class="stat">
                         <p class="small">Followers</p>
                         <h4>
-                            <a href="/users/{{ g.user.id }}/followers">
+                            <a href="{{ url_for('show_followers', user_id=g.user.id) }}">
                                 {{ g.user.followers | length }}
                             </a>
                         </h4>
@@ -51,12 +53,15 @@
         <ul class="list-group" id="messages">
             {% for msg in messages %}
                 <li class="list-group-item">
-                    <a href="/messages/{{ msg.id }}" class="message-link">
-                        <a href="/users/{{ msg.user.id }}">
+                    <a href="{{ url_for('messages_show', message_id=msg.id) }}"
+                       class="message-link">
+                        <a href="{{ url_for('users_show', user_id=msg.user.id) }}">
                             <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
                         </a>
                         <div class="message-area">
-                            <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
+                            <a href="{{ url_for('users_show', user_id=msg.user.id) }}">
+                                @{{ msg.user.username }}
+                            </a>
                             <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
                             <p>{{ msg.text }}</p>
                         </div>
@@ -64,7 +69,7 @@
                         {% if msg.user_id != g.user.id %}
                             {% if msg in likes %}
                                 <form method="POST"
-                                    action="/users/remove_like/{{ msg.id }}"
+                                    action="{{ url_for('remove_like', msg_id=msg.id) }}"
                                     id="messages-form">
                                     <button class="btn btn-sm btn-primary">
                                         <i class="fa fa-thumbs-up"></i>
@@ -72,7 +77,7 @@
                                 </form>
                             {% else %}
                                 <form method="POST"
-                                    action="/users/add_like/{{ msg.id }}"
+                                    action="{{ url_for('add_like', msg_id=msg.id) }}"
                                     id="messages-form">
                                     <button class="btn btn-sm btn-secondary">
                                         <i class="fa fa-thumbs-up"></i>
