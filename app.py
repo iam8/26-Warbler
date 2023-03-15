@@ -95,7 +95,6 @@ def signup():
 
         do_login(user)
 
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     else:
@@ -116,7 +115,6 @@ def login():
         if user:
             do_login(user)
             flash(f"Hello, {user.username}!", "success")
-            # return redirect("/")
             return redirect(url_for("homepage"))
 
         flash("Invalid credentials.", 'danger')
@@ -133,7 +131,6 @@ def logout():
     do_logout()
 
     flash("Successfully logged out!", category="success")
-    # return redirect("/login")
     return redirect(url_for("login"))
 
 
@@ -185,7 +182,6 @@ def show_following(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     user = db.get_or_404(User, user_id)
@@ -200,7 +196,6 @@ def show_followers(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     user = db.get_or_404(User, user_id)
@@ -215,7 +210,6 @@ def display_likes(user_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     user = db.get_or_404(User, user_id)
@@ -233,19 +227,16 @@ def add_follow(follow_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     if follow_id == g.user.id:
         flash("You cannot follow yourself!", "warning")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     followed_user = db.get_or_404(User, follow_id)
     g.user.following.append(followed_user)
     db.session.commit()
 
-    # return redirect(f"/users/{g.user.id}/following")
     return redirect(url_for("show_following", user_id=g.user.id))
 
 
@@ -257,7 +248,6 @@ def stop_following(follow_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     followed_user = db.get_or_404(User, follow_id)
@@ -266,12 +256,10 @@ def stop_following(follow_id):
         g.user.following.remove(followed_user)
     except ValueError:
         db.session.rollback()
-        # return redirect(f"/users/{g.user.id}/following")
         return redirect(url_for("show_following", user_id=g.user.id))
 
     db.session.commit()
 
-    # return redirect(f"/users/{g.user.id}/following")
     return redirect(url_for("show_following", user_id=g.user.id))
 
 
@@ -285,20 +273,17 @@ def add_like(msg_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     message = db.session.get(Message, msg_id)
 
     if message.user_id == g.user.id:
         flash("You cannot like your own messages!")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     g.user.likes.append(message)
     db.session.commit()
 
-    # return redirect(f"/users/{g.user.id}/likes")
     return redirect(url_for("display_likes", user_id=g.user.id))
 
 
@@ -310,7 +295,6 @@ def remove_like(msg_id):
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     message = db.session.get(Message, msg_id)
@@ -319,12 +303,10 @@ def remove_like(msg_id):
         g.user.likes.remove(message)
     except ValueError:
         db.session.rollback()
-        # return redirect(f"/users/{g.user.id}/likes")
         return redirect(url_for("display_likes", user_id=g.user.id))
 
     db.session.commit()
 
-    # return redirect(f"/users/{g.user.id}/likes")
     return redirect(url_for("display_likes", user_id=g.user.id))
 
 
@@ -337,7 +319,6 @@ def profile():
     # Check if user is logged in
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     user = g.user
@@ -348,7 +329,6 @@ def profile():
         # Check if password is correct
         if not User.authenticate(user.username, form.password.data):
             flash("Password incorrect.", category="danger")
-            # return redirect("/")
             return redirect(url_for("homepage"))
 
         user.username = form.username.data
@@ -367,7 +347,6 @@ def profile():
             return render_template("/users/edit.jinja2", form=form)
 
         flash("User updated!", category="success")
-        # return redirect(f"/users/{user.id}")
         return redirect(url_for("users_show", user_id=user.id))
 
     return render_template("/users/edit.jinja2", form=form)
@@ -381,7 +360,6 @@ def delete_user():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     do_logout()
@@ -389,7 +367,6 @@ def delete_user():
     db.session.delete(g.user)
     db.session.commit()
 
-    # return redirect("/signup")
     return redirect(url_for("signup"))
 
 
@@ -406,7 +383,6 @@ def messages_add():
 
     if not g.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     form = MessageForm()
@@ -416,7 +392,6 @@ def messages_add():
         g.user.messages.append(msg)
         db.session.commit()
 
-        # return redirect(f"/users/{g.user.id}")
         return redirect(url_for("users_show", user_id=g.user.id))
 
     return render_template('messages/new.jinja2', form=form)
@@ -442,13 +417,11 @@ def messages_destroy(message_id):
 
     if not g.user or g.user is not msg.user:
         flash("Access unauthorized.", "danger")
-        # return redirect("/")
         return redirect(url_for("homepage"))
 
     db.session.delete(msg)
     db.session.commit()
 
-    # return redirect(f"/users/{g.user.id}")
     return redirect(url_for("users_show", user_id=g.user.id))
 
 
