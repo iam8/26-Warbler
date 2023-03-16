@@ -20,6 +20,7 @@ app.config['DEBUG_TB_HOSTS'] = ['dont-show-debug-toolbar']
 connect_db(app)
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
 
 
