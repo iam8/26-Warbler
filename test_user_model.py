@@ -23,6 +23,7 @@ bcrypt = Bcrypt()
 connect_db(app)
 
 with app.app_context():
+    db.drop_all()
     db.create_all()
 
 
@@ -92,7 +93,7 @@ class UserModelTestCase(TestCase):
         self.assertEqual(user1.image_url, "/static/images/default-pic.png")
         self.assertEqual(user1.header_image_url, "/static/images/warbler-hero.jpg")
         self.assertIsNone(user1.bio)
-        self.assertIsNone(user1.location)
+        self.assertEqual(user1.location, "Planet Earth")
         self.assertEqual(user1.password, "HASHED_PASSWORD")
 
     def test_repr(self):
