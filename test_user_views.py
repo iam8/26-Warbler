@@ -324,6 +324,7 @@ class UserViewTestCase(TestCase):
                                                       "image_url": "NEW_IMAGE_URL",
                                                       "header_image_url": "NEW_HEADER_IMG",
                                                       "bio": "NEW BIO",
+                                                      "location": "US",
                                                       "password": "WRONG_PW"})
 
             self.assertEqual(resp.status_code, 302)
@@ -334,7 +335,7 @@ class UserViewTestCase(TestCase):
             self.assertEqual(extra_user.email, "extra@extra.com")
             self.assertEqual(extra_user.image_url, User.image_url.server_default.arg)
             self.assertEqual(extra_user.header_image_url, User.header_image_url.server_default.arg)
-            self.assertIsNone(extra_user.location)
+            self.assertEqual(extra_user.location, "Planet Earth")
             self.assertIsNone(extra_user.bio)
 
     def test_update_profile_invalid_inputs(self):
@@ -366,6 +367,7 @@ class UserViewTestCase(TestCase):
                                                       "image_url": "NEW_IMAGE_URL",
                                                       "header_image_url": "NEW_HEADER_IMG",
                                                       "bio": "NEW BIO",
+                                                      "location": "US",
                                                       "password": "EXTRA_PW"})
 
                 html = resp.get_data(as_text=True)
@@ -378,7 +380,7 @@ class UserViewTestCase(TestCase):
             self.assertEqual(extra_user.email, "extra@extra.com")
             self.assertEqual(extra_user.image_url, User.image_url.server_default.arg)
             self.assertEqual(extra_user.header_image_url, User.header_image_url.server_default.arg)
-            self.assertIsNone(extra_user.location)
+            self.assertEqual(extra_user.location, "Planet Earth")
             self.assertIsNone(extra_user.bio)
 
     def test_update_profile(self):
@@ -409,6 +411,7 @@ class UserViewTestCase(TestCase):
                                                       "image_url": "NEW_IMAGE_URL",
                                                       "header_image_url": "NEW_HEADER_IMG",
                                                       "bio": "NEW BIO",
+                                                      "location": "US",
                                                       "password": "EXTRA_PW"})
 
             self.assertEqual(resp.status_code, 302)
@@ -419,6 +422,7 @@ class UserViewTestCase(TestCase):
             self.assertEqual(extra_user.email, "NEW_EMAIL@EMAIL.COM")
             self.assertEqual(extra_user.image_url, "NEW_IMAGE_URL")
             self.assertEqual(extra_user.header_image_url, "NEW_HEADER_IMG")
+            self.assertEqual(extra_user.location, "US")
             self.assertEqual(extra_user.bio, "NEW BIO")
 
     # ---------------------------------------------------------------------------------------------
