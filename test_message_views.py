@@ -43,7 +43,8 @@ class MessageViewTestCase(TestCase):
             user = User.signup(username="testuser",
                                email="test@test.com",
                                password="testuser",
-                               image_url=None)
+                               image_url=None,
+                               location=None)
 
             db.session.commit()
             self.user_id = user.id
@@ -170,7 +171,8 @@ class MessageViewTestCase(TestCase):
             user1 = User.signup(username="testuser1",
                                 email="test1@test.com",
                                 password="testuser1",
-                                image_url=None)
+                                image_url=None,
+                                location=None)
 
             db.session.commit()
 
@@ -272,7 +274,8 @@ class MessageViewTestCase(TestCase):
             user1 = User.signup(username="testuser1",
                                 email="test1@test.com",
                                 password="testuser1",
-                                image_url=None)
+                                image_url=None,
+                                location=None)
 
             db.session.commit()
 
