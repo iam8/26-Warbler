@@ -167,7 +167,11 @@ class UserModelTestCase(TestCase):
         """
 
         with app.app_context():
-            user = User.signup("signupuser", "signup@test.com", "SIGNUPPW", "imageurl")
+            user = User.signup("signupuser",
+                               "signup@test.com",
+                               "SIGNUPPW",
+                               "imageurl",
+                               "Somewhere")
             db.session.commit()
 
             self.assertIsInstance(user, User)
@@ -184,12 +188,12 @@ class UserModelTestCase(TestCase):
         with app.app_context():
 
             # Violates uniqueness
-            User.signup("testuser", "test@test.com", "SIGNUPPW", "imageurl")
+            User.signup("testuser", "test@test.com", "SIGNUPPW", "imageurl", "Somewhere")
             self.assertRaises(IntegrityError, db.session.commit)
             db.session.rollback()
 
             # Violates non-nullable field constraints
-            User.signup(None, None, "SIGNUPPW", "imageurl")
+            User.signup(None, None, "SIGNUPPW", "imageurl", "Somewhere")
             self.assertRaises(IntegrityError, db.session.commit)
             db.session.rollback()
 
