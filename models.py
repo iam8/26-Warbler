@@ -100,6 +100,7 @@ class User(db.Model):
 
     location = db.Column(
         db.Text,
+        server_default="Planet Earth"
     )
 
     password = db.Column(
