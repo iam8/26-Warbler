@@ -85,6 +85,7 @@ def signup():
                 username=form.username.data,
                 password=form.password.data,
                 email=form.email.data,
+                location=form.location.data or User.location.server_default.arg,
                 image_url=form.image_url.data or User.image_url.server_default.arg,
             )
             db.session.commit()
@@ -337,6 +338,7 @@ def profile():
         user.header_image_url = (form.header_image_url.data or
                                  User.header_image_url.server_default.arg)
         user.bio = form.bio.data or None
+        user.location = form.location.data or None
 
         # Handle case where username or email is already taken
         try:
